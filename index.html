@@ -3,175 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassManager Omni V4 - Final</title>
+    <title>ClassManager Omni V5.0 - Blindado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .calendar-day { @apply w-8 h-8 flex items-center justify-center rounded-full text-sm cursor-pointer hover:bg-indigo-100 transition-colors; }
-        .calendar-day.active { @apply bg-indigo-600 text-white font-bold shadow-md; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #e2e8f0; }
+        .calendar-day { @apply w-8 h-8 flex items-center justify-center rounded-lg text-sm cursor-pointer font-medium hover:bg-blue-100 transition-all duration-200; }
+        .calendar-day.active { @apply bg-blue-600 text-white font-bold shadow-md transform scale-105; }
         
-        #loadingBlocker { @apply fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center text-white opacity-0 pointer-events-none transition-opacity duration-300; }
-        #loadingBlocker.active { @apply opacity-100 pointer-events-auto; }
-        
-        #toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 320px; padding: 16px; border-radius: 8px; font-size: 13px; font-weight: bold; display: flex; align-items: start; gap: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Sistema de Toast Flutuante (Não trava a tela) */
+        #toastContainer { position: fixed; top: 24px; right: 24px; z-index: 10000; display: flex; flex-direction: column; gap: 12px; }
+        .toast { min-width: 320px; padding: 16px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { transform: translateX(0); }
+        
+        .loading-overlay { @apply absolute inset-0 bg-white/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center rounded-2xl opacity-0 pointer-events-none transition-opacity duration-200; }
+        .loading-overlay.active { @apply opacity-100 pointer-events-auto; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="p-2 md:p-6 min-h-screen">
-
-    <div id="loadingBlocker">
-        <div class="w-14 h-14 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <h2 id="loadingTitle" class="text-2xl font-bold tracking-wide">A processar...</h2>
-        <p id="loadingDesc" class="text-indigo-200 mt-2 text-center max-w-sm">A comunicar com o Google Apps Script.</p>
-        <a id="btnAcessarDoc" href="#" target="_blank" class="hidden mt-6 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-lg shadow-lg flex items-center gap-2 transition-transform hover:scale-105">
-            <i data-lucide="external-link" class="w-5 h-5"></i> ABRIR O SEU DOCUMENTO
-        </a>
-    </div>
+<body class="p-3 md:p-6 min-h-screen">
 
     <div id="toastContainer"></div>
 
-    <div class="max-w-7xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+    <div class="max-w-[1600px] mx-auto bg-slate-50 rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200">
         
-        <!-- Navbar -->
-        <div class="bg-slate-900 p-5 flex flex-col md:flex-row items-center justify-between gap-4 border-b-4 border-indigo-500">
-            <div class="flex items-center gap-3">
-                <div class="bg-indigo-600 p-2.5 rounded-xl"><i data-lucide="folder-kanban" class="text-white w-6 h-6"></i></div>
+        <!-- HEADER -->
+        <div class="bg-white px-8 py-5 flex flex-col md:flex-row items-center justify-between border-b border-slate-200">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-200"><i data-lucide="blocks" class="text-white w-7 h-7"></i></div>
                 <div>
-                    <h1 class="text-white font-bold text-xl">ClassManager <span class="text-indigo-400">Omni</span></h1>
-                    <p class="text-slate-400 text-[10px] uppercase font-bold tracking-widest flex items-center gap-1">
-                        <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i> v4.0 Sincronização Perfeita
+                    <h1 class="text-slate-800 font-extrabold text-2xl tracking-tight">ClassManager <span class="text-blue-600">Omni</span></h1>
+                    <p class="text-slate-500 text-[11px] uppercase font-bold tracking-widest flex items-center gap-1 mt-0.5">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Motor V5.0 - Estabilidade Garantida
                     </p>
                 </div>
             </div>
             
-            <div class="flex gap-2 w-full md:w-auto bg-slate-800 p-1.5 rounded-xl">
-                <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow">AULA DIÁRIA</button>
-                <button onclick="switchTab('cards')" id="tab-cards" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white">REPORT CARDS</button>
+            <div class="flex gap-3 mt-4 md:mt-0 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                <button onclick="switchTab('daily')" id="tab-daily" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-blue-700 shadow-sm">AULA DIÁRIA</button>
+                <button onclick="switchTab('cards')" id="tab-cards" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-800">REPORT CARDS</button>
             </div>
         </div>
 
-        <!-- Configurações -->
-        <div class="bg-indigo-50/50 border-b p-4 flex flex-col md:flex-row items-end gap-4 justify-between">
-            <div class="flex-1 w-full">
-                <label class="text-[10px] font-bold text-indigo-800 uppercase mb-1 block">URL do Google Apps Script (/exec)</label>
-                <div class="flex gap-2">
-                    <input type="text" id="apiUrl" class="flex-1 bg-white border border-indigo-200 rounded-lg p-2.5 text-xs font-mono shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Cole o seu link do Apps Script aqui...">
+        <!-- MÓDULO 1: AULA DIÁRIA (LAYOUT 3 COLUNAS) -->
+        <div id="moduleDaily" class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
+                
+                <!-- OVERLAY DE CARREGAMENTO SEGURO (NUNCA TRAVA) -->
+                <div id="loaderUI" class="loading-overlay">
+                    <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <h3 id="loaderTitle" class="text-lg font-bold text-slate-800">A Processar...</h3>
+                    <p id="loaderDesc" class="text-sm text-slate-500 font-medium mt-1">Aguarde um instante.</p>
                 </div>
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-1/3">
-                <select id="turma" class="flex-1 border border-indigo-200 rounded-lg p-2.5 text-xs font-bold bg-white shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                    <option value="">Aguardando ligação...</option>
-                </select>
-                <button id="btnConectar" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-xs font-bold shadow hover:bg-indigo-700 transition-colors flex items-center gap-2">
-                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> LIGAR
-                </button>
+
+                <!-- COLUNA 1: CONFIGURAÇÃO E DATA (3/12) -->
+                <div class="lg:col-span-3 space-y-6 flex flex-col h-full">
+                    
+                    <!-- Ligação -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 block">1. Ligação (URL Apps Script)</label>
+                        <input type="text" id="apiUrl" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all mb-3" placeholder="https://script.google.com/macros/...">
+                        
+                        <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 block">2. Selecione a Turma</label>
+                        <div class="flex gap-2">
+                            <select id="turma" class="flex-1 bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-blue-500 shadow-sm cursor-pointer">
+                                <option value="">Aguardando ligação...</option>
+                            </select>
+                            <button id="btnConectar" class="bg-slate-800 text-white p-3 rounded-xl hover:bg-slate-700 transition-colors shadow-sm">
+                                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Calendário -->
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex-1">
+                        <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
+                            <button id="calPrev" class="text-slate-400 hover:text-blue-600 transition-colors p-1"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                            <span id="calMonth" class="text-sm font-extrabold uppercase text-slate-700 tracking-wider">Mês</span>
+                            <button id="calNext" class="text-slate-400 hover:text-blue-600 transition-colors p-1"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-slate-400 mb-3">
+                            <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                        </div>
+                        <div id="calDays" class="grid grid-cols-7 gap-1 text-center font-medium text-slate-600"></div>
+                        
+                        <div class="mt-6 p-4 bg-blue-50/50 border border-blue-100 rounded-xl flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold text-blue-400 uppercase tracking-wider">Data Selecionada</span>
+                            <span class="font-black text-blue-700 text-lg" id="displayData">--/--/----</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- COLUNA 2: ALUNOS E FREQUÊNCIA (4/12) -->
+                <div class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[700px]">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                        <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                            <i data-lucide="users-2" class="w-5 h-5 text-blue-500"></i> Frequência & Alunos
+                        </h3>
+                        <div class="flex gap-2">
+                            <button id="btnAllP" class="text-[10px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-2 rounded-lg transition-colors border border-emerald-200">TODOS P</button>
+                            <button id="btnAllF" class="text-[10px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 rounded-lg transition-colors border border-rose-200">TODOS F</button>
+                        </div>
+                    </div>
+                    
+                    <div id="studentsList" class="flex-1 overflow-y-auto space-y-3 pr-2">
+                        <div class="p-4 bg-slate-50 border border-slate-200 text-slate-500 text-sm font-medium rounded-xl text-center mt-10">
+                            Conecte o sistema e escolha uma turma para carregar os alunos.
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-100 space-y-4">
+                        <div>
+                            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Link Direto do Doc (Opcional)</label>
+                            <input type="text" id="docUrl" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] font-mono outline-none focus:border-blue-500 transition-all" placeholder="Deixe em branco para automático">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Professor da Aula</label>
+                            <input list="teacherList" id="globalTeacher" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" value="Thiago Ricci">
+                            <datalist id="teacherList"><option value="Thiago Ricci"><option value="Letícia"><option value="Bruno"><option value="Tainara"><option value="Giovanna"></datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUNA 3: RELATÓRIO E SALVAR (5/12) -->
+                <div class="lg:col-span-5 flex flex-col h-[700px]">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col">
+                        <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2 border-b border-slate-100 pb-4 mb-5">
+                            <i data-lucide="file-edit" class="w-5 h-5 text-blue-500"></i> Relatório da Aula
+                        </h3>
+                        
+                        <div class="flex-1 overflow-y-auto pr-2 space-y-4">
+                            <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Conteúdo Trabalhado</label><input id="repConteudo" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium focus:bg-white focus:border-blue-500 outline-none transition-colors"></div>
+                            <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Atividades Realizadas</label><input id="repAtividades" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:bg-white focus:border-blue-500 outline-none transition-colors"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Dificuldades Gerais</label><textarea id="repDificuldades" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm h-20 resize-none focus:bg-white focus:border-blue-500 outline-none transition-colors"></textarea></div>
+                                <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Pontos Positivos</label><textarea id="repPositivos" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm h-20 resize-none focus:bg-white focus:border-blue-500 outline-none transition-colors"></textarea></div>
+                            </div>
+                            <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Até onde foi o conteúdo</label><input id="repAteOnde" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:bg-white focus:border-blue-500 outline-none transition-colors"></div>
+                            <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5 block">Próxima Aula</label><input id="repProxima" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:bg-white focus:border-blue-500 outline-none transition-colors"></div>
+                            <div><label class="text-[10px] font-extrabold text-amber-500 uppercase tracking-wider mb-1.5 block">Observações Extras</label><textarea id="repObservacoes" class="w-full bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm h-14 resize-none focus:bg-white focus:border-amber-400 outline-none transition-colors"></textarea></div>
+                        </div>
+                    </div>
+                    
+                    <button id="btnSalvarDaily" class="mt-4 w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-200 flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0 opacity-50 pointer-events-none">
+                        <i data-lucide="save" class="w-5 h-5"></i> GUARDAR AULA NO GOOGLE
+                    </button>
+                    
+                    <a id="btnDocAbrir" href="#" target="_blank" class="hidden mt-3 w-full py-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors border border-emerald-200">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> ABRIR DOCUMENTO GERADO
+                    </a>
+                </div>
+
             </div>
         </div>
 
-        <!-- MÓDULO: AULA DIÁRIA -->
-        <div id="moduleDaily" class="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-            
-            <!-- Coluna Esquerda: Calendário e Link -->
-            <div class="lg:col-span-3 space-y-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
-                        <button id="calPrev" class="text-slate-400 hover:text-indigo-600"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-                        <span id="calMonth" class="text-sm font-bold uppercase text-slate-800 tracking-tight">Mês</span>
-                        <button id="calNext" class="text-slate-400 hover:text-indigo-600"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
-                    </div>
-                    
-                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-2">
-                        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
-                    </div>
-                    
-                    <div id="calDays" class="grid grid-cols-7 gap-1 text-center font-medium text-slate-600"></div>
-                    <div class="mt-5 pt-3 border-t">
-                        <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Data Selecionada</p>
-                        <div class="p-2.5 bg-indigo-50 border border-indigo-100 rounded-lg text-center font-bold text-indigo-800 text-sm" id="displayData">--/--/----</div>
-                    </div>
-                </div>
+        <!-- MÓDULO 2: REPORT CARDS -->
+        <div id="moduleCards" class="hidden p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
                 
-                <div class="bg-indigo-50/30 p-4 rounded-2xl border border-indigo-100 shadow-sm">
-                    <label class="text-[10px] font-bold text-indigo-800 uppercase mb-2 flex items-center gap-1">
-                        <i data-lucide="link" class="w-3 h-3"></i> Link do Relatório (Doc)
-                    </label>
-                    <input type="text" id="docUrl" class="w-full bg-white border border-indigo-200 rounded-lg p-2.5 text-[10px] font-mono outline-none focus:border-indigo-500" placeholder="Cole aqui o link do Doc da turma (opcional)">
-                    <p class="text-[9px] text-slate-500 mt-2 leading-tight">Se deixar em branco, o sistema tentará encontrar na pasta oficial ou criará um novo.</p>
+                <div id="loaderCards" class="loading-overlay">
+                    <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <h3 class="text-lg font-bold text-slate-800">A Gerar PDF...</h3>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Desenhando o Report Card oficial.</p>
                 </div>
-            </div>
 
-            <!-- Coluna Central: Frequência -->
-            <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                <div class="flex items-center justify-between border-b pb-3 mb-4">
-                    <h3 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-indigo-500"></i> Frequência & Alunos</h3>
-                    <div class="flex gap-1.5">
-                        <button id="btnAllP" class="text-[10px] font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2.5 py-1.5 rounded transition-colors border border-emerald-200">TODOS P</button>
-                        <button id="btnAllF" class="text-[10px] font-bold bg-rose-100 hover:bg-rose-200 text-rose-800 px-2.5 py-1.5 rounded transition-colors border border-rose-200">TODOS F</button>
-                    </div>
-                </div>
-                
-                <div id="studentsList" class="space-y-3 max-h-[420px] overflow-y-auto pr-2">
-                    <div class="p-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg flex items-start gap-3">
-                        <i data-lucide="alert-circle" class="shrink-0 mt-0.5"></i>
-                        <p>Ligue-se e selecione uma turma acima para carregar a lista de alunos.</p>
+                <div class="lg:col-span-12 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-2">
+                    <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2 border-b border-slate-100 pb-4 mb-5">
+                        <i data-lucide="sliders" class="w-5 h-5 text-indigo-500"></i> Configurações do Trimestre
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 block">Nível (Level)</label><select id="rcLevel" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-indigo-500 transition-colors"><option value="A0">A0</option><option value="A1-A2" selected>A1-A2</option><option value="A2-B1">A2-B1</option><option value="B1-B2">B1-B2</option><option value="B2-C1">B2-C1</option><option value="C1-C2">C1-C2</option></select></div>
+                        <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 block">Tipo</label><select id="rcType" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-indigo-500 transition-colors"><option value="Group" selected>Group</option><option value="Individual">Individual</option></select></div>
+                        <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 block">Frequência</label><input type="text" id="rcFreq" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-indigo-500 transition-colors" placeholder="Ex: 2x week"></div>
+                        <div><label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 block">Mês / Trimestre</label><input type="text" id="rcMonth" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-indigo-500 transition-colors"></div>
                     </div>
                 </div>
 
-                <div class="mt-auto pt-4 border-t">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Teacher (Professor)</label>
-                    <input list="teacherList" id="globalTeacher" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-bold text-indigo-900 focus:outline-none focus:border-indigo-500" value="Thiago Ricci">
-                    <datalist id="teacherList"><option value="Thiago Ricci"><option value="Letícia"><option value="Bruno"><option value="Tainara"><option value="Giovanna"></datalist>
-                </div>
-            </div>
+                <div id="cardsList" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"></div>
 
-            <!-- Coluna Direita: Relatório -->
-            <div class="lg:col-span-5 bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col">
-                <h3 class="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-300 pb-3 mb-4">
-                    <i data-lucide="file-text" class="w-4 h-4 text-indigo-500"></i> Relatório da Aula
-                </h3>
-                <div class="space-y-4 overflow-y-auto pr-2">
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Conteúdo Trabalhado</label><input id="repConteudo" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs font-semibold focus:border-indigo-500 outline-none"></div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Atividades Realizadas</label><input id="repAtividades" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs focus:border-indigo-500 outline-none"></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Dificuldades Gerais</label><textarea id="repDificuldades" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs h-16 resize-none focus:border-indigo-500 outline-none"></textarea></div>
-                        <div><label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Pontos Positivos</label><textarea id="repPositivos" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs h-16 resize-none focus:border-indigo-500 outline-none"></textarea></div>
-                    </div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Até onde foi o conteúdo</label><input id="repAteOnde" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs focus:border-indigo-500 outline-none"></div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Próxima Aula</label><input id="repProxima" class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs focus:border-indigo-500 outline-none"></div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Observações Extras</label><textarea id="repObservacoes" class="w-full bg-yellow-50 border border-yellow-200 rounded-lg p-2.5 text-xs h-14 resize-none focus:border-yellow-400 outline-none"></textarea></div>
-                </div>
-                
-                <div class="mt-6 pt-4 border-t flex justify-end">
-                    <button id="btnSalvarDaily" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg shadow-emerald-200 flex items-center justify-center gap-3 transition-transform hover:scale-105 opacity-50 pointer-events-none">
-                        <i data-lucide="send" class="w-5 h-5"></i> SALVAR NA PLANILHA & DOC
+                <div class="lg:col-span-12 flex justify-end items-center gap-4 mt-2">
+                    <a id="btnDocCards" href="#" target="_blank" class="hidden px-6 py-4 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-2xl font-extrabold text-sm uppercase tracking-widest flex items-center gap-2 transition-colors border border-emerald-200">
+                        <i data-lucide="external-link" class="w-5 h-5"></i> ABRIR PDF GERADO
+                    </a>
+                    <button id="btnGenerateReports" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-indigo-200 flex items-center gap-3 transition-transform transform hover:-translate-y-0.5 opacity-50 pointer-events-none">
+                        <i data-lucide="file-check-2" class="w-5 h-5"></i> GERAR REPORT CARDS NO DOCS
                     </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- MÓDULO: REPORT CARDS -->
-        <div id="moduleCards" class="hidden p-6 bg-slate-50">
-            <div class="bg-indigo-50 border border-indigo-200 p-5 rounded-2xl mb-6">
-                <h3 class="font-bold text-indigo-900 border-b border-indigo-100 pb-2 mb-4 flex items-center gap-2">
-                    <i data-lucide="sliders" class="w-4 h-4 text-indigo-500"></i> Configurações do Trimestre
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Nível (Level)</label><select id="rcLevel" class="w-full border rounded-lg p-2.5 text-sm font-semibold outline-none focus:border-indigo-500"><option value="A0">A0</option><option value="A1-A2" selected>A1-A2</option><option value="A2-B1">A2-B1</option><option value="B1-B2">B1-B2</option><option value="B2-C1">B2-C1</option><option value="C1-C2">C1-C2</option></select></div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Tipo (Class Type)</label><select id="rcType" class="w-full border rounded-lg p-2.5 text-sm font-semibold outline-none focus:border-indigo-500"><option value="Group" selected>Group</option><option value="Individual">Individual</option></select></div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Frequência</label><input type="text" id="rcFreq" class="w-full border rounded-lg p-2.5 text-sm font-semibold outline-none focus:border-indigo-500" placeholder="Ex: 2x week"></div>
-                    <div><label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Mês / Trimestre</label><input type="text" id="rcMonth" class="w-full border rounded-lg p-2.5 text-sm font-semibold outline-none focus:border-indigo-500"></div>
-                </div>
-            </div>
-
-            <div id="cardsList" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6"></div>
-
-            <div class="flex justify-end">
-                <button id="btnGenerateReports" class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-black rounded-xl shadow-xl flex items-center gap-3 transform hover:scale-105 opacity-50 pointer-events-none">
-                    <i data-lucide="file-output" class="w-5 h-5"></i> GERAR REPORT CARDS (PDF)
-                </button>
             </div>
         </div>
     </div>
@@ -179,82 +203,93 @@
     <script>
         lucide.createIcons();
         
-        // Elementos DOM Principais
+        // Elementos DOM
         const api = document.getElementById('apiUrl');
         const turma = document.getElementById('turma');
         const docUrlInput = document.getElementById('docUrl');
         const btnSalvarDaily = document.getElementById('btnSalvarDaily');
         const btnGenerateReports = document.getElementById('btnGenerateReports');
         const toastContainer = document.getElementById('toastContainer');
+        const btnDocAbrir = document.getElementById('btnDocAbrir');
+        const btnDocCards = document.getElementById('btnDocCards');
         
-        let alunosData = [];
+        let alunosData = []; // Guardará puramente os nomes originais em Array.
         let curDate = new Date();
 
-        // Geração de ID Único e Seguro para os inputs (Impede erros com acentos ou barras)
-        const genSafeId = (str) => btoa(encodeURIComponent(str)).replace(/[^a-zA-Z0-9]/g, '');
-
-        // Controlador de Tela de Espera
-        const Loader = {
-            timeout: null,
-            show(title, desc) {
-                document.getElementById('loadingTitle').innerText = title;
-                document.getElementById('loadingDesc').innerText = desc;
-                document.getElementById('loadingBlocker').classList.add('active');
-                document.getElementById('btnAcessarDoc').classList.add('hidden');
-                
-                clearTimeout(this.timeout);
-                this.timeout = setTimeout(() => {
-                    this.hide();
-                    showToast("Tempo de Espera Esgotado", "O Google demorou demasiado a responder (30s) e a ligação foi cortada. A sua internet pode estar lenta.", true);
-                }, 30000);
-            },
-            hide() {
-                document.getElementById('loadingBlocker').classList.remove('active');
-                clearTimeout(this.timeout);
-            }
-        };
-
-        // Alertas Flutuantes
+        // MOTOR DE NOTIFICAÇÕES SEGURO
         function showToast(title, message, isError = false) {
             const toast = document.createElement('div');
-            toast.className = `toast text-white ${isError ? 'bg-rose-600' : 'bg-emerald-600'}`;
-            toast.innerHTML = `<i data-lucide="${isError ? 'alert-triangle' : 'check-circle'}" class="w-6 h-6 mt-0.5 shrink-0"></i><div><h4 class="font-bold text-sm">${title}</h4><p class="text-xs opacity-90 leading-relaxed mt-1">${message}</p></div>`;
-            
+            toast.className = `toast ${isError ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-white'}`;
+            toast.innerHTML = `<i data-lucide="${isError ? 'alert-octagon' : 'check-circle-2'}" class="w-7 h-7 shrink-0"></i><div><h4 class="font-extrabold text-[15px] mb-0.5">${title}</h4><p class="text-[12px] opacity-90 leading-tight font-medium">${message}</p></div>`;
             toastContainer.appendChild(toast);
             lucide.createIcons();
             
             setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 9000);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 7000);
         }
 
-        // Recuperar Dados Guardados
-        api.onchange = () => localStorage.setItem('omni_api_v4', api.value.trim());
-        docUrlInput.onchange = () => {
-            if(turma.value) localStorage.setItem('docurl_v4_' + turma.value, docUrlInput.value.trim());
+        // CONTROLADOR DE LOADERS (Garante libertação do ecrã)
+        const Loader = {
+            id: 'loaderUI',
+            timeout: null,
+            show(title, desc, isCards = false) {
+                this.id = isCards ? 'loaderCards' : 'loaderUI';
+                const l = document.getElementById(this.id);
+                if(!l) return;
+                
+                l.querySelector('h3').innerText = title;
+                l.querySelector('p').innerText = desc;
+                l.classList.add('active');
+                
+                btnDocAbrir.classList.add('hidden');
+                btnDocCards.classList.add('hidden');
+                
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(() => {
+                    this.hide();
+                    showToast("Espera Esgotada", "A comunicação com o Google falhou ou demorou mais de 25 segundos. Verifique o link e tente novamente.", true);
+                }, 25000);
+            },
+            hide() {
+                const l = document.getElementById(this.id);
+                if(l) l.classList.remove('active');
+                clearTimeout(this.timeout);
+            }
         };
 
+        // RECUPERAR SESSÃO
+        api.onchange = () => localStorage.setItem('omni_api_v5', api.value.trim());
+        docUrlInput.onchange = () => { if(turma.value) localStorage.setItem('docv5_' + turma.value, docUrlInput.value.trim()); };
+
         window.onload = () => {
-            api.value = localStorage.getItem('omni_api_v4') || '';
+            api.value = localStorage.getItem('omni_api_v5') || '';
             const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             document.getElementById('rcMonth').value = `${mNames[new Date().getMonth()]} ${new Date().getFullYear()}`;
             if(api.value) document.getElementById('btnConectar').click();
         };
 
-        // Alternar Abas
+        // ALTERNAR ABAS
         window.switchTab = function(t) {
             document.getElementById('moduleDaily').classList.toggle('hidden', t !== 'daily');
             document.getElementById('moduleCards').classList.toggle('hidden', t !== 'cards');
-            document.getElementById('tab-daily').classList.toggle('bg-indigo-600', t === 'daily');
-            document.getElementById('tab-daily').classList.toggle('text-white', t === 'daily');
-            document.getElementById('tab-cards').classList.toggle('bg-indigo-600', t === 'cards');
-            document.getElementById('tab-cards').classList.toggle('text-white', t === 'cards');
+            
+            const btnD = document.getElementById('tab-daily');
+            const btnC = document.getElementById('tab-cards');
+            
+            if(t === 'daily') {
+                btnD.className = "px-6 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-blue-700 shadow-sm";
+                btnC.className = "px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-800";
+            } else {
+                btnC.className = "px-6 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-indigo-700 shadow-sm";
+                btnD.className = "px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-800";
+            }
         };
 
-        // Motor de Comunicação API
+        // COMUNICAÇÃO FETCH (100% BLINDADA)
         async function callAPI(payload) {
             if (!api.value || api.value.trim() === '') {
-                showToast("Erro na Ligação", "Por favor, cole a URL do Apps Script no topo da página.", true);
-                throw new Error("SEM_URL");
+                showToast("Erro de Configuração", "O campo do URL da API está vazio.", true);
+                throw new Error("STOP");
             }
             
             try {
@@ -263,110 +298,111 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
-                
                 const text = await res.text();
                 
                 if (text.toLowerCase().includes("<html")) {
-                    showToast("Bloqueado pelo Google (CORS)", "O Google bloqueou a sua permissão. Vá ao Apps Script > Nova Implementação e certifique-se que o acesso está definido como 'Qualquer Pessoa'.", true);
-                    throw new Error("BLOQUEADO_PELO_GOOGLE");
+                    showToast("Permissão Negada", "O Google Apps Script precisa estar configurado para 'Qualquer Pessoa'. Altere a implementação e atualize a página.", true);
+                    throw new Error("STOP");
                 }
                 
-                return JSON.parse(text);
-            } catch (e) { 
-                if (e.message !== "SEM_URL" && e.message !== "BLOQUEADO_PELO_GOOGLE") {
-                    showToast("Falha de Comunicação", "Ocorreu um erro ao comunicar com a Planilha. Verifique a sua conexão de internet.", true);
+                const json = JSON.parse(text);
+                if(json.status === "Erro") {
+                    showToast("Erro no Google", json.mensagem, true);
+                    throw new Error("STOP");
                 }
-                throw e; // Interrompe as funções que chamaram a API
+                return json;
+            } catch (e) { 
+                if (e.message !== "STOP") showToast("Falha na Rede", "Ocorreu um erro ao comunicar com a internet.", true);
+                throw e; 
             }
         }
 
-        // Início da Conexão
+        // 1. CONECTAR
         document.getElementById('btnConectar').onclick = async () => {
             try {
-                Loader.show("A Ligar...", "A ler as turmas diretamente da sua folha de cálculo.");
+                Loader.show("A Ligar...", "Buscando turmas disponíveis...");
                 const data = await callAPI({acao: "buscar_abas"});
-                if (data && data.status === "Sucesso") {
-                    turma.innerHTML = '<option value="">(Selecione uma turma encontrada)</option>' + data.abas.map(a => `<option value="${a}">${a}</option>`).join('');
-                    showToast("Sucesso!", "O sistema foi ligado com sucesso à folha de cálculo.");
-                } else if (data && data.status === "Erro") {
-                    showToast("Erro no Script", data.mensagem, true);
+                if (data.status === "Sucesso") {
+                    turma.innerHTML = '<option value="">-- Escolha uma Turma --</option>' + data.abas.map(a => `<option value="${a}">${a}</option>`).join('');
+                    showToast("Ligação Estável", "Folha de cálculo sincronizada com sucesso!");
                 }
             } catch(e) {} finally { Loader.hide(); }
         };
 
-        // Mudança de Turma
+        // 2. MUDAR TURMA
         turma.onchange = async () => {
             if(!turma.value) {
                 btnSalvarDaily.classList.add('opacity-50', 'pointer-events-none');
                 btnGenerateReports.classList.add('opacity-50', 'pointer-events-none');
                 docUrlInput.value = '';
-                document.getElementById('studentsList').innerHTML = '';
+                document.getElementById('studentsList').innerHTML = '<div class="p-4 bg-slate-50 border border-slate-200 text-slate-500 text-sm font-medium rounded-xl text-center mt-10">Conecte o sistema e escolha uma turma.</div>';
+                document.getElementById('cardsList').innerHTML = '';
+                btnDocAbrir.classList.add('hidden');
                 return;
             }
             
-            docUrlInput.value = localStorage.getItem('docurl_v4_' + turma.value) || '';
+            docUrlInput.value = localStorage.getItem('docv5_' + turma.value) || '';
 
             try {
-                Loader.show("A Preparar...", `A extrair as informações dos alunos da turma ${turma.value}.`);
+                Loader.show("A Preparar...", `Lendo dados da turma ${turma.value}...`);
                 const res = await callAPI({acao: "buscar_alunos", turma: turma.value});
                 
-                if(res && res.status === "Sucesso") {
-                    alunosData = res.alunos;
-                    renderStudents(res.alunos);
-                    renderReportCardsUI(res.alunos);
+                if(res.status === "Sucesso") {
+                    alunosData = res.alunos; // Array puro. Ex: ["Guilherme Melo", "Magnun", "Gabriel"]
+                    renderStudents();
+                    renderReportCardsUI();
                     btnSalvarDaily.classList.remove('opacity-50', 'pointer-events-none');
                     btnGenerateReports.classList.remove('opacity-50', 'pointer-events-none');
                     await loadDailyData(); 
-                } else if (res && res.status === "Erro") {
-                    showToast("Erro da Planilha", res.mensagem, true);
                 }
             } catch(e) {} finally { Loader.hide(); }
         };
 
-        // Renderizar Lista de Alunos (Daily)
-        function renderStudents(alunos) {
+        // RENDERS ALUNOS (USANDO ÍNDICES MATEMÁTICOS PARA EVITAR ERROS)
+        function renderStudents() {
             const list = document.getElementById('studentsList');
-            if(alunos.length === 0) { list.innerHTML = '<div class="p-4 bg-rose-50 text-rose-800 text-sm rounded-lg border border-rose-200">Atenção: Não foram encontrados alunos na primeira linha desta aba.</div>'; return; }
+            if(alunosData.length === 0) { 
+                list.innerHTML = '<div class="p-4 bg-amber-50 text-amber-800 text-sm font-bold rounded-xl border border-amber-200 text-center">Nenhum aluno encontrado nas células do topo.</div>'; 
+                return; 
+            }
 
-            list.innerHTML = alunos.map(a => {
-                const sid = genSafeId(a);
-                return `
-                <div class="bg-white p-3.5 rounded-xl border border-slate-200 hover:border-indigo-300 transition-colors shadow-sm">
-                    <div class="flex justify-between items-center mb-2.5">
-                        <span class="text-xs font-bold text-slate-800 truncate pr-2">${a}</span>
-                        <div class="flex gap-1 shrink-0">
-                            <button onclick="mark('${a}', 'P')" id="p-${sid}" class="w-7 h-7 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400">P</button>
-                            <button onclick="mark('${a}', 'F')" id="f-${sid}" class="w-7 h-7 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400">F</button>
+            list.innerHTML = alunosData.map((nome, i) => `
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm transition-all hover:border-blue-300">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-black text-slate-800 truncate pr-2">${nome}</span>
+                        <div class="flex gap-1.5 shrink-0 bg-slate-50 p-1 rounded-lg border border-slate-100">
+                            <button onclick="mark(${i}, 'P')" id="p-${i}" class="w-8 h-8 rounded-md bg-slate-200 text-slate-500 text-[10px] font-black transition-colors">P</button>
+                            <button onclick="mark(${i}, 'F')" id="f-${i}" class="w-8 h-8 rounded-md bg-slate-200 text-slate-500 text-[10px] font-black transition-colors">F</button>
                         </div>
                     </div>
-                    <div class="space-y-1.5 border-t border-slate-100 pt-2">
-                        <input id="dif-${sid}" placeholder="Dificuldade percebida..." class="w-full text-xs p-2 bg-slate-50 border border-slate-100 rounded focus:bg-white focus:border-indigo-300 outline-none transition-colors">
-                        <input id="elo-${sid}" placeholder="Ponto positivo / elogio..." class="w-full text-xs p-2 bg-slate-50 border border-slate-100 rounded focus:bg-white focus:border-indigo-300 outline-none transition-colors">
+                    <div class="space-y-2 border-t border-slate-100 pt-3">
+                        <input id="dif-${i}" placeholder="Descreva uma dificuldade..." class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-blue-400 outline-none transition-colors">
+                        <input id="elo-${i}" placeholder="Faça um elogio ou aponte avanço..." class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-blue-400 outline-none transition-colors">
                     </div>
-                </div>`;
-            }).join('');
+                </div>`).join('');
         }
 
-        // Função de Faltas/Presenças
-        window.mark = (nome, status) => {
-            const sid = genSafeId(nome);
-            const p = document.getElementById(`p-${sid}`), f = document.getElementById(`f-${sid}`), dif = document.getElementById(`dif-${sid}`);
+        window.mark = (index, status) => {
+            const p = document.getElementById(`p-${index}`);
+            const f = document.getElementById(`f-${index}`);
+            const dif = document.getElementById(`dif-${index}`);
+            if(!p || !f) return; // Segurança extra
             
             if(status === 'P') {
-                if(p) p.className = "w-7 h-7 rounded bg-emerald-500 text-white border-emerald-600 text-[10px] font-bold shadow-sm";
-                if(f) f.className = "w-7 h-7 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400";
+                p.className = "w-8 h-8 rounded-md bg-emerald-500 text-white text-[10px] font-black shadow-sm transform scale-105 transition-all";
+                f.className = "w-8 h-8 rounded-md bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black transition-all";
                 if(dif && dif.value === "AUSENTE") dif.value = "";
             } else {
-                if(f) f.className = "w-7 h-7 rounded bg-rose-500 text-white border-rose-600 text-[10px] font-bold shadow-sm";
-                if(p) p.className = "w-7 h-7 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400";
+                f.className = "w-8 h-8 rounded-md bg-rose-500 text-white text-[10px] font-black shadow-sm transform scale-105 transition-all";
+                p.className = "w-8 h-8 rounded-md bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black transition-all";
                 if(dif) dif.value = "AUSENTE";
             }
         };
 
-        document.getElementById('btnAllP').onclick = () => alunosData.forEach(a => mark(a, 'P'));
-        document.getElementById('btnAllF').onclick = () => alunosData.forEach(a => mark(a, 'F'));
+        document.getElementById('btnAllP').onclick = () => alunosData.forEach((_, i) => mark(i, 'P'));
+        document.getElementById('btnAllF').onclick = () => alunosData.forEach((_, i) => mark(i, 'F'));
 
-        // Calendário de Navegação de Datas
+        // CALENDÁRIO
         function renderCal() {
             const days = document.getElementById('calDays');
             const disp = document.getElementById('displayData');
@@ -384,7 +420,7 @@
             
             for(let i=1; i<=total; i++) {
                 const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                const active = dateStr === selStr ? 'bg-indigo-600 text-white font-bold shadow-md' : 'hover:bg-indigo-100';
+                const active = dateStr === selStr ? 'bg-blue-600 text-white font-extrabold shadow-lg shadow-blue-200 transform scale-110' : 'hover:bg-slate-200 text-slate-600';
                 days.innerHTML += `<div class="calendar-day ${active}" onclick="selectDate('${dateStr}')">${i}</div>`;
             }
             disp.innerText = `${String(curDate.getDate()).padStart(2,'0')}/${String(m+1).padStart(2,'0')}/${y}`;
@@ -395,7 +431,7 @@
             curDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
             renderCal();
             if(turma.value) {
-                try { Loader.show("A pesquisar...", "A verificar se existe aula nesta data."); await loadDailyData(); } catch(e) {} finally { Loader.hide(); }
+                try { Loader.show("A pesquisar...", "Verificando se existe histórico de aula..."); await loadDailyData(); } catch(e) {} finally { Loader.hide(); }
             }
         };
 
@@ -403,190 +439,166 @@
         document.getElementById('calNext').onclick = () => { curDate.setMonth(curDate.getMonth() + 1); renderCal(); };
         renderCal();
 
-        // Carregar Histórico do Dia
+        // FUNÇÃO DE LIMPEZA GERAL DE ERROS DO GOOGLE DOCS ANTIGO
+        function clearGarbage(texto) {
+            let t = String(texto || "").trim();
+            // EXTERMINADOR: Se contiver "class report", retorna vazio imediatamente.
+            if(t.toLowerCase().includes("class report -") || t.toLowerCase().includes("class report-")) return "";
+            return t;
+        }
+
+        // CARREGAR HISTÓRICO
         async function loadDailyData() {
             const res = await callAPI({ acao: "buscar_dados", turma: turma.value, data: document.getElementById('displayData').innerText });
             
-            // Limpa os campos antigos
+            // Limpa Tudo
             ['repConteudo', 'repAtividades', 'repDificuldades', 'repPositivos', 'repAteOnde', 'repProxima', 'repObservacoes'].forEach(id => document.getElementById(id).value = "");
-            alunosData.forEach(a => {
-                const sid = genSafeId(a);
-                if(document.getElementById(`p-${sid}`)) document.getElementById(`p-${sid}`).className = "w-7 h-7 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400";
-                if(document.getElementById(`f-${sid}`)) document.getElementById(`f-${sid}`).className = "w-7 h-7 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400";
-                if(document.getElementById(`dif-${sid}`)) document.getElementById(`dif-${sid}`).value = "";
-                if(document.getElementById(`elo-${sid}`)) document.getElementById(`elo-${sid}`).value = "";
+            alunosData.forEach((_, i) => {
+                if(document.getElementById(`p-${i}`)) document.getElementById(`p-${i}`).className = "w-8 h-8 rounded-md bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black transition-all";
+                if(document.getElementById(`f-${i}`)) document.getElementById(`f-${i}`).className = "w-8 h-8 rounded-md bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black transition-all";
+                if(document.getElementById(`dif-${i}`)) document.getElementById(`dif-${i}`).value = "";
+                if(document.getElementById(`elo-${i}`)) document.getElementById(`elo-${i}`).value = "";
             });
+            btnDocAbrir.classList.add('hidden');
 
-            if(res && res.status === "Sucesso" && res.dados) {
+            if(res.status === "Sucesso" && res.dados) {
                 const d = res.dados;
-                document.getElementById('repConteudo').value = d.lessonPlan || "";
-                document.getElementById('repAtividades').value = d.extraActivity || "";
-                document.getElementById('repProxima').value = d.objectives || "";
-                document.getElementById('repObservacoes').value = d.observation || "";
+                // Extermina lixo de cabeçalhos que possam ter capturado "Class Report - Nome"
+                document.getElementById('repConteudo').value = clearGarbage(d.lessonPlan);
+                document.getElementById('repAtividades').value = clearGarbage(d.extraActivity);
+                document.getElementById('repProxima').value = clearGarbage(d.objectives);
+                document.getElementById('repObservacoes').value = clearGarbage(d.observation);
                 if(d.teacher) document.getElementById('globalTeacher').value = d.teacher;
                 
-                // Lógica de Limpeza do Texto de Class Report (Para não puxar os nomes "Class Report - Maria...")
-                let reportBruto = d.classReport || "";
-                if (reportBruto.toLowerCase().includes("class report -")) reportBruto = ""; 
-                
-                // Divisão Inteligente entre Dificuldades e Positivos
+                // Divisão Perfeita: Dificuldades / Positivos
+                let reportBruto = clearGarbage(d.classReport);
                 if (reportBruto.includes("Positivos:")) {
                     const partes = reportBruto.split("Positivos:");
                     document.getElementById('repDificuldades').value = partes[0].replace("Dificuldades:", "").trim();
                     document.getElementById('repPositivos').value = partes[1] ? partes[1].trim() : "";
                 } else {
-                    document.getElementById('repDificuldades').value = reportBruto.trim();
+                    document.getElementById('repDificuldades').value = reportBruto;
                 }
                 
-                // Aplicar as Faltas/Presenças
+                // Faltas e Presenças
                 const attStr = (d.attendance || "").toLowerCase(); const absStr = (d.absence || "").toLowerCase();
-                alunosData.forEach(std => {
-                    if (absStr.includes(std.toLowerCase())) mark(std, 'F');
-                    else if (attStr.includes(std.toLowerCase()) || attStr.includes('x')) mark(std, 'P');
+                alunosData.forEach((nome, i) => {
+                    const nomeMin = nome.toLowerCase();
+                    if (absStr.includes(nomeMin)) mark(i, 'F');
+                    else if (attStr.includes(nomeMin) || attStr.includes('x')) mark(i, 'P');
                 });
-                showToast("Data Carregada", "A recuperar informações da aula registada.");
-            } else if (res && res.status === "Erro") {
-                showToast("Aviso da Folha", res.mensagem, true);
+                showToast("Informações Carregadas", "Encontrei um histórico para este dia.", false);
             }
         }
 
-        // =====================================
-        // BOTÃO GIGANTE: SALVAR AULA DIÁRIA
-        // =====================================
+        // SALVAR DADOS NO GOOGLE
         btnSalvarDaily.onclick = async () => {
             try {
-                // Validação de inputs
                 let presentes = [], ausentes = [];
-                alunosData.forEach(a => {
-                    const sid = genSafeId(a);
-                    const p = document.getElementById(`p-${sid}`);
-                    const f = document.getElementById(`f-${sid}`);
-                    if(p && p.classList.contains('bg-emerald-500')) presentes.push(a);
-                    if(f && f.classList.contains('bg-rose-500')) ausentes.push(a);
+                alunosData.forEach((nome, i) => {
+                    const p = document.getElementById(`p-${i}`);
+                    const f = document.getElementById(`f-${i}`);
+                    if(p && p.classList.contains('bg-emerald-500')) presentes.push(nome);
+                    if(f && f.classList.contains('bg-rose-500')) ausentes.push(nome);
                 });
                 
+                const attText = presentes.length === alunosData.length && alunosData.length > 0 ? "X, " + presentes.join(', ') : presentes.join(', ');
+
                 const payload = {
                     acao: "salvar_tudo", turma: turma.value,
                     docUrl: docUrlInput.value.trim(),
                     data: document.getElementById('displayData').innerText,
-                    attendance: presentes.length === alunosData.length && alunosData.length > 0 ? "X, " + presentes.join(', ') : presentes.join(', '), 
-                    absence: ausentes.join(', '), 
+                    attendance: attText, absence: ausentes.join(', '), 
                     teacher: document.getElementById('globalTeacher').value,
                     report: {
-                        conteudo: document.getElementById('repConteudo').value, atividades: document.getElementById('repAtividades').value,
-                        dificuldadesGerais: document.getElementById('repDificuldades').value, pontosPositivos: document.getElementById('repPositivos').value,
-                        ateOnde: document.getElementById('repAteOnde').value, proximaAula: document.getElementById('repProxima').value, observacoes: document.getElementById('repObservacoes').value
+                        conteudo: document.getElementById('repConteudo').value.trim(), atividades: document.getElementById('repAtividades').value.trim(),
+                        dificuldadesGerais: document.getElementById('repDificuldades').value.trim(), pontosPositivos: document.getElementById('repPositivos').value.trim(),
+                        ateOnde: document.getElementById('repAteOnde').value.trim(), proximaAula: document.getElementById('repProxima').value.trim(), observacoes: document.getElementById('repObservacoes').value.trim()
                     },
-                    alunos: alunosData.map(a => {
-                        const sid = genSafeId(a);
-                        const dif = document.getElementById(`dif-${sid}`);
-                        const elo = document.getElementById(`elo-${sid}`);
-                        return { nome: a, dificuldade: dif ? dif.value : "", elogio: elo ? elo.value : "" };
+                    alunos: alunosData.map((nome, i) => {
+                        const dif = document.getElementById(`dif-${i}`);
+                        const elo = document.getElementById(`elo-${i}`);
+                        return { nome: nome, dificuldade: dif ? dif.value.trim() : "", elogio: elo ? elo.value.trim() : "" };
                     })
                 };
 
-                Loader.show("A Gravar Dados...", "O sistema está a gravar na sua folha e a preencher o Documento do Word associado.");
+                Loader.show("A Gravar Dados...", "O sistema está escrevendo na folha e no Google Docs de forma segura.");
                 const res = await callAPI(payload);
                 
-                if(res && res.status === "Sucesso") {
-                    showToast("Aula Salva com Sucesso!", "A folha de cálculo e o documento oficial foram atualizados sem erros.");
-                    if(res.docUrl && res.docUrl !== docUrlInput.value) {
-                        docUrlInput.value = res.docUrl; // Guarda o link se ele foi criado agora
-                        localStorage.setItem('docurl_v4_' + turma.value, res.docUrl);
+                if(res.status === "Sucesso") {
+                    showToast("Gravação Completa", "Folha de Cálculo e Relatório atualizados com sucesso!");
+                    if(res.docUrl) {
+                        docUrlInput.value = res.docUrl; 
+                        localStorage.setItem('docv5_' + turma.value, res.docUrl);
+                        btnDocAbrir.href = res.docUrl;
+                        btnDocAbrir.classList.remove('hidden');
                     }
-                } else if (res && res.status === "Erro") {
-                    showToast("O Google recusou a gravação", res.mensagem, true);
                 }
-            } catch (err) {
-                console.error("ERRO COMPLETO:", err);
-                showToast("Erro de Javascript", "Houve um problema ao processar os dados: " + err.message, true);
-            } finally {
-                Loader.hide();
-            }
+            } catch (err) {} finally { Loader.hide(); }
         };
 
-        // =====================================
-        // MÓDULO 2: REPORT CARDS (TRIMESTRE)
-        // =====================================
-        function renderReportCardsUI(alunos) {
+        // -------------------------------------
+        // REPORT CARDS 
+        // -------------------------------------
+        function renderReportCardsUI() {
             const list = document.getElementById('cardsList');
             const opts = `<option value="5">5 - Excellent</option><option value="4">4 - Very Good</option><option value="3" selected>3 - Good</option><option value="2">2 - Developing</option><option value="1">1 - Needs Improvement</option>`;
             
-            list.innerHTML = alunos.map(a => {
-                const sid = genSafeId(a);
-                return `
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <h4 class="font-black text-lg text-indigo-900 border-b border-slate-200 pb-2 mb-4">${a}</h4>
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-3 mb-4">
+            list.innerHTML = alunosData.map((nome, i) => `
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                    <h4 class="font-extrabold text-lg text-indigo-900 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2"><i data-lucide="user" class="w-4 h-4 text-indigo-400"></i> ${nome}</h4>
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-4 mb-5">
                         <div>
-                            <p class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">SKILLS</p>
-                            <label class="flex justify-between items-center text-xs font-semibold mb-2">Speaking <select id="rc-spk-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
-                            <label class="flex justify-between items-center text-xs font-semibold mb-2">Listening <select id="rc-lis-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
-                            <label class="flex justify-between items-center text-xs font-semibold mb-2">Reading <select id="rc-rea-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
-                            <label class="flex justify-between items-center text-xs font-semibold">Writing <select id="rc-wri-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
+                            <p class="text-[9px] font-black text-slate-400 mb-3 uppercase tracking-widest bg-slate-50 p-1.5 rounded text-center">SKILLS</p>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600 mb-2">Speaking <select id="rc-spk-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600 mb-2">Listening <select id="rc-lis-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600 mb-2">Reading <select id="rc-rea-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600">Writing <select id="rc-wri-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
                         </div>
                         <div>
-                            <p class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">TOPICS</p>
-                            <label class="flex justify-between items-center text-xs font-semibold mb-2">Grammar <select id="rc-gra-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
-                            <label class="flex justify-between items-center text-xs font-semibold mb-2">Vocabulary <select id="rc-voc-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
-                            <label class="flex justify-between items-center text-xs font-semibold mb-2">Participation <select id="rc-par-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
-                            <label class="flex justify-between items-center text-xs font-semibold">Preparation <select id="rc-pre-${sid}" class="border border-slate-300 rounded p-1 bg-slate-50 outline-none">${opts}</select></label>
+                            <p class="text-[9px] font-black text-slate-400 mb-3 uppercase tracking-widest bg-slate-50 p-1.5 rounded text-center">TOPICS</p>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600 mb-2">Grammar <select id="rc-gra-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600 mb-2">Vocabulary <select id="rc-voc-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600 mb-2">Participation <select id="rc-par-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
+                            <label class="flex justify-between items-center text-xs font-bold text-slate-600">Preparation <select id="rc-pre-${i}" class="border border-slate-200 rounded p-1.5 bg-white shadow-sm outline-none">${opts}</select></label>
                         </div>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100">
-                        <label class="text-[10px] font-bold text-indigo-500 uppercase block mb-1">Teacher's Comment</label>
-                        <textarea id="rc-com-${sid}" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-xs resize-none bg-slate-50 outline-none focus:border-indigo-500" placeholder="O feedback final trimestral entra aqui..."></textarea>
+                    <div class="pt-4 border-t border-slate-100">
+                        <label class="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider block mb-2">Comentário Trimestral do Professor</label>
+                        <textarea id="rc-com-${i}" rows="3" class="w-full border border-slate-200 rounded-xl p-3 text-xs font-medium resize-none bg-slate-50 outline-none focus:border-indigo-500 transition-colors" placeholder="Escreva o feedback..."></textarea>
                     </div>
-                </div>`;
-            }).join('');
+                </div>`).join('');
+            lucide.createIcons();
         }
 
         btnGenerateReports.onclick = async () => {
             try {
-                Loader.show("A Gerar Report Cards...", "A desenhar as folhas de desempenho no Google Docs. Demorará apenas alguns segundos.");
+                Loader.show("A Gerar PDF Oficial...", "Isto pode levar cerca de 10 a 15 segundos.", true);
 
                 const payload = {
                     acao: "gerar_report_cards", turma: turma.value, teacher: document.getElementById('globalTeacher').value,
                     level: document.getElementById('rcLevel').value, classType: document.getElementById('rcType').value,
                     frequency: document.getElementById('rcFreq').value, mes: document.getElementById('rcMonth').value,
-                    alunos: alunosData.map(a => {
-                        const sid = genSafeId(a);
-                        const spk = document.getElementById(`rc-spk-${sid}`), lis = document.getElementById(`rc-lis-${sid}`),
-                              rea = document.getElementById(`rc-rea-${sid}`), wri = document.getElementById(`rc-wri-${sid}`),
-                              gra = document.getElementById(`rc-gra-${sid}`), voc = document.getElementById(`rc-voc-${sid}`),
-                              par = document.getElementById(`rc-par-${sid}`), pre = document.getElementById(`rc-pre-${sid}`),
-                              com = document.getElementById(`rc-com-${sid}`);
-                              
+                    alunos: alunosData.map((nome, i) => {
                         return {
-                            nome: a, speaking: spk?spk.value:"", listening: lis?lis.value:"", reading: rea?rea.value:"", writing: wri?wri.value:"",
-                            grammar: gra?gra.value:"", vocab: voc?voc.value:"", participation: par?par.value:"", preparation: pre?pre.value:"",
-                            comment: com?com.value:""
+                            nome: nome,
+                            speaking: document.getElementById(`rc-spk-${i}`).value, listening: document.getElementById(`rc-lis-${i}`).value,
+                            reading: document.getElementById(`rc-rea-${i}`).value, writing: document.getElementById(`rc-wri-${i}`).value,
+                            grammar: document.getElementById(`rc-gra-${i}`).value, vocab: document.getElementById(`rc-voc-${i}`).value,
+                            participation: document.getElementById(`rc-par-${i}`).value, preparation: document.getElementById(`rc-pre-${i}`).value,
+                            comment: document.getElementById(`rc-com-${i}`).value.trim()
                         };
                     })
                 };
 
                 const res = await callAPI(payload);
-                if(res && res.status === "Sucesso" && res.url) {
-                    document.getElementById('loadingTitle').innerText = "Report Cards Prontos!";
-                    document.getElementById('loadingDesc').innerText = "Clique no botão abaixo para abrir e imprimir o PDF.";
-                    const btnDoc = document.getElementById('btnAcessarDoc');
-                    btnDoc.href = res.url;
-                    btnDoc.classList.remove('hidden');
-                    clearTimeout(Loader.timeout); 
-                    showToast("Sucesso", "O documento foi inserido na sua pasta segura.");
-                } else {
-                    if (res && res.status === "Erro") showToast("O Google recusou a geração", res.mensagem, true);
-                    Loader.hide();
+                if(res.status === "Sucesso" && res.url) {
+                    showToast("Sucesso", "O PDF Trimestral foi gerado e guardado!");
+                    btnDocCards.href = res.url;
+                    btnDocCards.classList.remove('hidden');
                 }
-            } catch (err) {
-                console.error("ERRO COMPLETO:", err);
-                showToast("Erro Local", err.message, true);
-                Loader.hide();
-            }
+            } catch (err) {} finally { Loader.hide(); }
         };
-
-        // Fecha o painel de espera 1 segundo após o utilizador clicar no botão verde.
-        document.getElementById('btnAcessarDoc').onclick = () => { setTimeout(() => Loader.hide(), 1000); };
 
     </script>
 </body>
