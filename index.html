@@ -3,544 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassManager Omni V5 - Blindado</title>
+    <title>ClassManager Omni V5 - Ultra Blindado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
         
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        /* Loader Overlay */
+        /* Loader */
         #loader { transition: opacity 0.3s ease; }
-        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid white; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; border-top: 4px solid white; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Toast Animations */
-        .toast-enter { transform: translateX(100%); opacity: 0; }
-        .toast-enter-active { transform: translateX(0); opacity: 1; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .toast-exit { transform: translateX(100%); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* Animations */
+        .toast-enter { transform: translateY(-20px); opacity: 0; }
+        .toast-active { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        
+        /* Calendar */
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem; transition: all 0.2s; }
+        .cal-day:hover { background-color: #e2e8f0; }
+        .cal-selected { background-color: #2563eb !important; color: white !important; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); }
+        .cal-today { border: 2px solid #2563eb; color: #2563eb; }
 
-        /* Tab active state */
-        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: 600; }
-        .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
-        .tab-inactive:hover { color: #334155; border-bottom: 2px solid #cbd5e1; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 700; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col pb-10">
 
-    <!-- Loader -->
-    <div id="loader" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex-col items-center justify-center">
+    <!-- Loader Overlay -->
+    <div id="loader" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex flex-col items-center justify-center">
         <div class="spinner mb-4"></div>
-        <p class="text-white font-medium tracking-wide" id="loaderText">Processando...</p>
+        <p class="text-white font-bold tracking-widest text-sm uppercase" id="loaderText">Sincronizando...</p>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toastContainer" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+    <!-- Toast Messages -->
+    <div id="toastContainer" class="fixed top-6 right-6 z-[110] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-200">
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 text-blue-600">
-                <i data-lucide="graduation-cap" class="w-8 h-8"></i>
-                <h1 class="text-xl font-bold tracking-tight text-slate-800">ClassManager <span class="text-blue-600">Omni</span></h1>
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">ClassManager <span class="text-blue-600">Omni V5</span></h1>
             </div>
-            <!-- Auto-save Status Indicator -->
-            <div id="autoSaveIndicator" class="hidden items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs font-medium">
-                <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>
-                <span class="text-slate-600">Sincronizado</span>
+            
+            <div id="syncStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <div class="w-2 h-2 rounded-full bg-slate-300" id="syncDot"></div>
+                <span id="syncText">Offline</span>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-8 space-y-6">
+    <main class="max-w-6xl mx-auto w-full px-4 py-8 space-y-6">
 
-        <!-- SETUP & CONTEXT CARD -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <div class="flex flex-col md:flex-row gap-4 items-end">
-                <div class="flex-grow w-full">
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">URL do Google Apps Script (Web App)</label>
-                    <div class="relative">
-                        <i data-lucide="link" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-                        <input type="password" id="apiUrl" onchange="salvarURL()" placeholder="https://script.google.com/macros/s/..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
-                    </div>
-                </div>
-                <button onclick="carregarTurmas()" class="w-full md:w-auto px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
-                    <i data-lucide="plug" class="w-4 h-4"></i> Conectar
-                </button>
-            </div>
-
-            <div id="contextArea" class="hidden mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-8">
-                
-                <div class="md:col-span-7 flex flex-col gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Turma</label>
-                        <div class="relative">
-                            <select id="selectTurma" onchange="aoMudarTurma()" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm text-lg font-medium text-slate-800">
-                                <option value="">Selecione uma turma...</option>
-                            </select>
-                            <i data-lucide="chevron-down" class="w-5 h-5 absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
+        <!-- CONFIGURATION CARD -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-grow w-full">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Configuração do Motor (Web App URL)</label>
+                        <div class="relative group">
+                            <i data-lucide="link-2" class="w-4 h-4 absolute left-3 top-3 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+                            <input type="password" id="apiUrl" onchange="salvarURLLocal()" placeholder="Cole aqui o URL do seu script implantado..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium">
                         </div>
                     </div>
-                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
-                        <h4 class="font-bold text-blue-900 mb-1 flex items-center gap-2 text-sm"><i data-lucide="zap" class="w-4 h-4"></i> Auto-Save Ativo</h4>
-                        <p class="text-xs text-blue-800/80">
-                            Qualquer alteração será salva automaticamente no Sheets e Docs após 2 segundos de inatividade.
-                        </p>
-                    </div>
+                    <button onclick="conectarSistema()" class="w-full md:w-auto px-8 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95">
+                        <i data-lucide="zap" class="w-4 h-4"></i> Conectar
+                    </button>
                 </div>
 
-                <!-- MONTHLY CALENDAR -->
-                <div class="md:col-span-5">
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
+                <!-- SELECTORS -->
+                <div id="contextArea" class="hidden mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-8">
+                    <div class="md:col-span-7 space-y-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Turma Ativa</label>
+                            <div class="relative">
+                                <select id="selectTurma" onchange="selecionarTurma()" class="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl appearance-none focus:border-blue-500 outline-none font-bold text-slate-800 shadow-sm transition-all cursor-pointer">
+                                    <option value="">A carregar turmas...</option>
+                                </select>
+                                <i data-lucide="chevron-down" class="w-5 h-5 absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200 relative overflow-hidden group">
+                            <i data-lucide="check-circle" class="w-20 h-20 absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform"></i>
+                            <div class="relative z-10">
+                                <h4 class="font-extrabold flex items-center gap-2 mb-1"><i data-lucide="shield-check" class="w-5 h-5"></i> Modo Auto-Save</h4>
+                                <p class="text-[11px] font-medium opacity-90 leading-relaxed">
+                                    O sistema salva automaticamente na planilha e no Drive após 2 segundos sem digitação. Sem stress.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MINI CALENDAR -->
+                    <div class="md:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-inner">
                         <div class="flex justify-between items-center mb-4">
-                            <button onclick="mudarMes(-1)" class="p-1 hover:bg-white border rounded text-slate-600"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                            <h4 id="monthYearDisplay" class="font-bold text-slate-800 text-xs uppercase tracking-widest">Mês Ano</h4>
-                            <button onclick="mudarMes(1)" class="p-1 hover:bg-white border rounded text-slate-600"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                            <button onclick="navegarMes(-1)" class="p-1.5 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                            <span id="labelMes" class="text-[10px] font-black uppercase tracking-widest text-slate-500">Mês Ano</span>
+                            <button onclick="navegarMes(1)" class="p-1.5 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                         </div>
-                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-2">
-                            <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-[9px] font-black text-slate-400 mb-2 uppercase">
+                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
                         </div>
-                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
-                            <!-- JS -->
-                        </div>
+                        <div id="gridCalendario" class="grid grid-cols-7 gap-1"></div>
                         <input type="hidden" id="inputData">
                     </div>
                 </div>
-
             </div>
-        </div>
+        </section>
 
-        <!-- MAIN WORKSPACE -->
-        <div id="workspaceArea" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            
-            <div class="flex border-b border-slate-200 px-6 pt-2 bg-slate-50">
-                <button onclick="switchTab('tab-daily')" id="btn-tab-daily" class="tab-active px-6 py-3 text-sm flex items-center gap-2">
-                    <i data-lucide="book-open" class="w-4 h-4"></i> Diário de Aula
+        <!-- WORKSPACE -->
+        <div id="workspaceArea" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[500px]">
+            <!-- TABS -->
+            <div class="flex px-6 pt-2 bg-slate-50 border-b border-slate-200">
+                <button onclick="abaAtiva('tab-daily')" id="btn-tab-daily" class="px-6 py-4 text-xs font-bold uppercase tracking-wider tab-active flex items-center gap-2 transition-all">
+                    <i data-lucide="calendar-days" class="w-4 h-4"></i> Diário de Aula
                 </button>
-                <button onclick="switchTab('tab-reports')" id="btn-tab-reports" class="tab-inactive px-6 py-3 text-sm flex items-center gap-2">
-                    <i data-lucide="award" class="w-4 h-4"></i> Report Cards
+                <button onclick="abaAtiva('tab-reports')" id="btn-tab-reports" class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 border-b-3 border-transparent flex items-center gap-2 transition-all">
+                    <i data-lucide="medal" class="w-4 h-4"></i> Report Cards
                 </button>
             </div>
 
-            <!-- TAB 1: DAILY REPORT -->
-            <div id="tab-daily" class="p-6 space-y-8">
-                
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2">
-                        <i data-lucide="users" class="w-5 h-5 text-blue-500"></i> Presença e Notas do Dia
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Presentes (Attendance)</label>
-                            <input type="text" id="dr-attendance" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none" readonly>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Faltas (Absence)</label>
-                            <input type="text" id="dr-absence" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none" readonly>
-                        </div>
+            <!-- TAB: DAILY -->
+            <div id="tab-daily" class="p-6 space-y-10">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-tighter">1. Presença e Avaliação Individual</h3>
                     </div>
-
-                    <div id="studentsDailyList" class="space-y-3">
-                        <!-- Gerado via JS -->
-                    </div>
+                    <div id="listaAlunosDiario" class="space-y-3"></div>
                 </div>
 
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2">
-                        <i data-lucide="file-text" class="w-5 h-5 text-blue-500"></i> Relatório da Aula
-                    </h3>
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Professor(a)</label>
-                        <input type="text" id="dr-teacher" class="w-full md:w-1/3 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                    </div>
-
+                <div class="space-y-4">
+                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-tighter border-b border-slate-100 pb-2">2. Resumo da Aula</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Conteúdo trabalhado</label>
-                                <textarea id="dr-conteudo" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Atividades realizadas</label>
-                                <textarea id="dr-atividades" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Até onde foi o conteúdo</label>
-                                <textarea id="dr-ateOnde" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                            </div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Conteúdo</label><textarea id="dr-conteudo" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Atividades</label><textarea id="dr-atividades" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
                         </div>
                         <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Dificuldades da turma</label>
-                                <textarea id="dr-dificuldades" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Pontos positivos</label>
-                                <textarea id="dr-positivos" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Próxima aula</label>
-                                <textarea id="dr-proxima" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                            </div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Dificuldades</label><textarea id="dr-dificuldades" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Próxima Aula</label><textarea id="dr-proxima" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Observações extras</label>
-                            <textarea id="dr-obs" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <input type="text" id="dr-teacher" placeholder="Teacher" class="p-3 bg-slate-50 border rounded-xl text-sm">
+                        <input type="text" id="dr-ateOnde" placeholder="Ate onde foi..." class="p-3 bg-slate-50 border rounded-xl text-sm">
                     </div>
                 </div>
 
-                <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
-                    <span class="text-xs text-slate-400 italic font-medium flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> Salvamento automático habilitado.</span>
-                    <div class="flex gap-4 items-center">
-                        <a id="linkDocDiario" href="#" target="_blank" class="hidden text-blue-600 hover:text-blue-800 font-bold text-sm flex items-center gap-1"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir Relatório Drive</a>
-                        <button onclick="salvarDiario(false)" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2 transform active:scale-95">
-                            <i data-lucide="save" class="w-4 h-4"></i> Forçar Salvamento
-                        </button>
+                <div class="pt-8 flex justify-between items-center">
+                    <div id="boxAttendanceStrings" class="hidden flex gap-4 text-[10px] font-bold text-slate-400">
+                        <span id="strPres">PRES: -</span>
+                        <span id="strAbs">FALT: -</span>
+                    </div>
+                    <div class="flex gap-4">
+                        <a id="btnLinkDocs" href="#" target="_blank" class="hidden text-blue-600 font-bold text-xs">Ver Docs</a>
+                        <button onclick="forcarSalvamento()" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl">Salvar</button>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: REPORT CARDS -->
-            <div id="tab-reports" class="hidden p-6 space-y-8">
-                <div id="studentsReportCardList" class="space-y-6">
-                    <!-- JS -->
+            <!-- TAB: REPORTS -->
+            <div id="tab-reports" class="hidden p-6 space-y-6">
+                <div class="grid grid-cols-4 gap-4">
+                    <input type="text" id="rcMonth" placeholder="Mês" class="p-2 border rounded text-sm">
+                    <input type="text" id="rcLevel" placeholder="Nível" class="p-2 border rounded text-sm">
+                    <input type="text" id="rcFreq" placeholder="Freq" class="p-2 border rounded text-sm">
+                    <input type="text" id="rcType" placeholder="Tipo" class="p-2 border rounded text-sm">
                 </div>
-                <div class="pt-6 border-t border-slate-100 flex justify-end items-center gap-4">
-                    <a id="linkDocRC" href="#" target="_blank" class="hidden text-green-600 hover:text-green-800 font-bold text-sm flex items-center gap-1"><i data-lucide="external-link" class="w-4 h-4"></i> Ver Report Cards</a>
-                    <button onclick="gerarReportCards()" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2 transform active:scale-95">
-                        <i data-lucide="file-text" class="w-5 h-5"></i> Gerar Report Cards Trimestrais
-                    </button>
+                <div id="listaAlunosRC" class="space-y-6"></div>
+                <div class="flex justify-end gap-4">
+                    <a id="btnDocCards" href="#" target="_blank" class="hidden text-green-600 font-bold text-xs">Cards</a>
+                    <button onclick="gerarReportCards()" class="px-8 py-3 bg-green-600 text-white font-bold rounded-2xl">Gerar</button>
                 </div>
             </div>
-
         </div>
     </main>
 
     <script>
-        // ESTADO GLOBAL
-        const state = {
-            alunos: [],
-            presenca: [], 
-            docDiarioUrl: null,
-            navDate: new Date(),
-            selectedDateStr: "",
-            isReady: false
-        };
-
-        let autoSaveTimer = null;
-        let isSaving = false;
+        const state = { alunos: [], presencas: [], navDate: new Date(), selectedDateStr: "", isReady: false, isSaving: false, docUrl: "" };
+        let autoSaveTimeout = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            
-            const savedUrl = localStorage.getItem('omniApiUrl');
-            if(savedUrl) document.getElementById('apiUrl').value = savedUrl;
-
+            const saved = localStorage.getItem('omniV5_apiUrl');
+            if (saved) document.getElementById('apiUrl').value = saved;
             const hoje = new Date();
-            state.selectedDateStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+            state.selectedDateStr = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
             document.getElementById('inputData').value = state.selectedDateStr;
             renderizarCalendario();
-
-            // Ativa Auto-save apenas em inputs de texto
-            document.getElementById('tab-daily').addEventListener('input', (e) => {
-                if (state.isReady && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-                    gatilhoAutoSave();
-                }
-            });
+            document.getElementById('tab-daily').addEventListener('input', () => { if (state.isReady) gatilhoAutoSave(); });
         });
 
-        // --- COMUNICAÇÃO API BLINDADA ---
         async function callAPI(payload) {
             const url = document.getElementById('apiUrl').value.trim();
-            if (!url) {
-                showToast("Configuração", "Por favor, insira o URL do App da Web.", "error");
-                throw new Error("URL vazia");
-            }
-
             try {
-                // O segredo para GAS: redirect: 'follow' e body stringificado
-                const response = await fetch(url, { 
-                    method: 'POST', 
-                    body: JSON.stringify(payload),
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-
-                if (!response.ok) throw new Error("Erro na rede: " + response.statusText);
-                
+                const response = await fetch(url, { method: 'POST', redirect: 'follow', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 const data = await response.json();
-                if(data.status === "Erro") throw new Error(data.mensagem);
+                if (data.status === "Erro") throw new Error(data.mensagem);
                 return data;
             } catch (err) {
-                console.error("API Error:", err);
-                showToast("Erro de Conexão", err.message, "error");
+                showToast("Erro", err.message, "error");
                 throw err;
             }
         }
 
-        // --- AUTO-SAVE LOGIC ---
         function gatilhoAutoSave() {
-            const ind = document.getElementById('autoSaveIndicator');
-            ind.classList.remove('hidden');
-            ind.classList.add('flex');
-            ind.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 text-amber-500 animate-spin"></i><span class="text-amber-600 font-bold">Salvando...</span>`;
-            lucide.createIcons();
-
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
-                salvarDiario(true); 
-            }, 2000);
+            setStatusSincronizando();
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => { salvarDadosDiario(true); }, 2500);
         }
 
-        function setStatusSalvo(sucesso = true) {
-            const ind = document.getElementById('autoSaveIndicator');
-            if(sucesso) {
-                ind.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i><span class="text-green-700 font-bold">Salvo com Sucesso!</span>`;
-            } else {
-                ind.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i><span class="text-red-700 font-bold">Erro ao Salvar</span>`;
-            }
-            lucide.createIcons();
-            setTimeout(() => { if(!autoSaveTimer) ind.classList.add('hidden'); }, 3000);
+        function setStatusSincronizando() {
+            const txt = document.getElementById('syncText');
+            txt.innerText = "Sincronizando...";
+            document.getElementById('syncDot').className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
         }
 
-        // --- UI UTILS ---
-        function showLoader(text = "Processando...") {
-            document.getElementById('loaderText').innerText = text;
-            document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('loader').classList.add('flex');
+        function setStatusSincronizado(sucesso = true) {
+            const txt = document.getElementById('syncText');
+            txt.innerText = sucesso ? "Sincronizado" : "Erro";
+            document.getElementById('syncDot').className = "w-2 h-2 rounded-full " + (sucesso ? "bg-green-500" : "bg-red-500");
         }
 
-        function hideLoader() {
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('loader').classList.remove('flex');
-        }
-
-        function showToast(title, message, type = 'success') {
+        function showToast(title, msg, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const colors = type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-
-            toast.className = `toast-enter flex items-start gap-3 p-4 min-w-[320px] border rounded-xl shadow-xl ${colors}`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i><div><h4 class="font-bold text-sm">${title}</h4><p class="text-xs opacity-90 mt-1">${message}</p></div>`;
-            
+            toast.className = `toast-enter p-4 min-w-[320px] bg-white border-l-4 rounded-xl shadow-xl flex items-start gap-3 pointer-events-auto transition-all ${type === 'success' ? 'border-green-500' : 'border-red-500'}`;
+            toast.innerHTML = `<div><h4 class="font-black text-xs uppercase">${title}</h4><p class="text-xs mt-1">${msg}</p></div>`;
             container.appendChild(toast);
-            lucide.createIcons({ root: toast });
-            requestAnimationFrame(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-enter-active'); });
-            setTimeout(() => { toast.remove(); }, 4000);
+            requestAnimationFrame(() => toast.classList.add('toast-active'));
+            setTimeout(() => { toast.classList.remove('toast-active'); setTimeout(() => toast.remove(), 300); }, 4000);
         }
 
-        function salvarURL() {
-            const url = document.getElementById('apiUrl').value.trim();
-            if(url) localStorage.setItem('omniApiUrl', url);
-        }
+        function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
 
-        function switchTab(tabId) {
+        function abaAtiva(id) {
             document.getElementById('tab-daily').classList.add('hidden');
             document.getElementById('tab-reports').classList.add('hidden');
-            document.getElementById(tabId).classList.remove('hidden');
-            document.getElementById('btn-tab-daily').className = 'px-6 py-3 text-sm flex items-center gap-2 tab-inactive';
-            document.getElementById('btn-tab-reports').className = 'px-6 py-3 text-sm flex items-center gap-2 tab-inactive';
-            document.getElementById('btn-' + tabId).className = 'px-6 py-3 text-sm flex items-center gap-2 tab-active';
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById('btn-tab-daily').classList.toggle('tab-active', id==='tab-daily');
+            document.getElementById('btn-tab-reports').classList.toggle('tab-active', id==='tab-reports');
         }
 
-        // --- CALENDÁRIO ---
         function renderizarCalendario() {
             const y = state.navDate.getFullYear(), m = state.navDate.getMonth();
-            const first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
-            document.getElementById('monthYearDisplay').innerText = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(state.navDate);
-            const grid = document.getElementById('calendarGrid'); grid.innerHTML = '';
-            for(let i=0; i<first; i++) grid.innerHTML += `<div></div>`;
-            for(let d=1; d<=days; d++) {
+            const first = new Date(y, m, 1).getDay(), total = new Date(y, m + 1, 0).getDate();
+            document.getElementById('labelMes').innerText = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(state.navDate);
+            const grid = document.getElementById('gridCalendario');
+            grid.innerHTML = '';
+            for (let i = 0; i < first; i++) grid.innerHTML += `<div></div>`;
+            for (let d = 1; d <= total; d++) {
                 const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const sel = ds === state.selectedDateStr;
-                grid.innerHTML += `<div onclick="selecionarData('${ds}')" class="w-7 h-7 mx-auto flex items-center justify-center rounded-lg cursor-pointer text-[11px] font-bold transition-all ${sel ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-200'}">${d}</div>`;
+                grid.innerHTML += `<div onclick="selecionarData('${ds}')" class="cal-day ${ds === state.selectedDateStr ? 'cal-selected' : ''}">${d}</div>`;
             }
         }
-        function mudarMes(v) { state.navDate.setMonth(state.navDate.getMonth() + v); renderizarCalendario(); }
-        function selecionarData(ds) { state.selectedDateStr = ds; document.getElementById('inputData').value = ds; renderizarCalendario(); buscarDadosData(); }
 
-        // --- ACTIONS ---
-        async function carregarTurmas() {
-            showLoader("Verificando Conexão...");
+        function navegarMes(v) { state.navDate.setMonth(state.navDate.getMonth() + v); renderizarCalendario(); }
+        function selecionarData(str) { state.selectedDateStr = str; document.getElementById('inputData').value = str; renderizarCalendario(); buscarDadosData(); }
+
+        function salvarURLLocal() { localStorage.setItem('omniV5_apiUrl', document.getElementById('apiUrl').value.trim()); }
+
+        async function conectarSistema() {
+            toggleLoader(true);
             try {
                 const res = await callAPI({ acao: "buscar_abas" });
                 const sel = document.getElementById('selectTurma');
-                sel.innerHTML = '<option value="">Escolha a turma...</option>';
-                res.abas.forEach(aba => sel.innerHTML += `<option value="${aba}">${aba}</option>`);
+                sel.innerHTML = '<option value="">Turma...</option>';
+                res.abas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
                 document.getElementById('contextArea').classList.remove('hidden');
-                showToast("Online", "Acesso à planilha garantido.", "success");
-            } catch(e) {} finally { hideLoader(); }
+            } finally { toggleLoader(false); }
         }
 
-        async function aoMudarTurma() {
-            const turma = document.getElementById('selectTurma').value;
-            if(!turma) return;
-            showLoader("Carregando Alunos...");
+        async function selecionarTurma() {
+            const t = document.getElementById('selectTurma').value;
+            if (!t) return;
+            toggleLoader(true);
             try {
-                const res = await callAPI({ acao: "buscar_alunos", turma: turma });
+                const res = await callAPI({ acao: "buscar_alunos", turma: t });
                 state.alunos = res.alunos || [];
-                state.presenca = state.alunos.map(() => 'P');
-                renderizarInterfaceAlunos();
+                state.presencas = state.alunos.map(() => 'P');
+                gerarInterfaceAlunos();
                 document.getElementById('workspaceArea').classList.remove('hidden');
                 buscarDadosData();
-            } catch(e) {} finally { hideLoader(); }
+            } finally { toggleLoader(false); }
         }
 
-        function renderizarInterfaceAlunos() {
-            const daily = document.getElementById('studentsDailyList'), rc = document.getElementById('studentsReportCardList');
-            daily.innerHTML = ''; rc.innerHTML = '';
-            const options = `<option value="">-</option><option value="5">5 - Exc.</option><option value="4">4 - Very Good</option><option value="3">3 - Good</option><option value="2">2 - Dev.</option><option value="1">1 - Needs Imp.</option>`;
-
-            state.alunos.forEach((nome, i) => {
-                daily.innerHTML += `
-                    <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col lg:flex-row gap-4 items-center">
-                        <div class="w-full lg:w-1/3 flex items-center justify-between">
-                            <span class="font-bold text-slate-700 text-sm truncate">${nome}</span>
-                            <div class="flex bg-slate-100 p-1 rounded-lg">
-                                <button onclick="setPresenca(${i},'P')" id="btn-p-${i}" class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold rounded-md shadow-sm">P</button>
-                                <button onclick="setPresenca(${i},'F')" id="btn-f-${i}" class="px-3 py-1 text-slate-500 text-[10px] font-bold rounded-md">F</button>
-                            </div>
-                        </div>
-                        <div class="flex-grow flex gap-2 w-full lg:w-2/3">
-                            <input type="text" id="dr-dif-${i}" placeholder="Dificuldades..." class="w-1/2 px-3 py-2 text-xs border border-slate-200 rounded-md outline-none focus:border-blue-400">
-                            <input type="text" id="dr-elo-${i}" placeholder="Elogios..." class="w-1/2 px-3 py-2 text-xs border border-slate-200 rounded-md outline-none focus:border-blue-400">
-                        </div>
-                    </div>`;
-                rc.innerHTML += `<div class="p-4 bg-slate-50 border rounded-xl shadow-sm"><h4 class="font-bold mb-3 text-sm">${nome}</h4><div class="grid grid-cols-4 gap-2 text-[10px]">${['spk','lis','rea','wri','gra','voc','par','pre'].map(k=>`<div><label class="block mb-1">${k.toUpperCase()}</label><select id="rc-${k}-${i}" class="w-full border rounded p-1">${options}</select></div>`).join('')}</div><textarea id="rc-com-${i}" placeholder="Comentário..." class="w-full mt-2 text-xs border rounded p-2 resize-none h-12 outline-none"></textarea></div>`;
+        function gerarInterfaceAlunos() {
+            const d = document.getElementById('listaAlunosDiario'), r = document.getElementById('listaAlunosRC');
+            d.innerHTML = ''; r.innerHTML = '';
+            state.alunos.forEach((n, i) => {
+                d.innerHTML += `<div class="p-3 bg-white border rounded-2xl flex items-center gap-4">
+                    <span class="text-xs font-bold w-1/3">${n}</span>
+                    <button onclick="setPresenca(${i},'P')" id="btn-p-${i}" class="px-4 py-1.5 rounded bg-green-500 text-white text-[10px]">P</button>
+                    <button onclick="setPresenca(${i},'F')" id="btn-f-${i}" class="px-4 py-1.5 rounded text-slate-400 text-[10px]">F</button>
+                    <input id="dr-dif-${i}" class="flex-grow p-2 border rounded-xl text-xs" placeholder="Dif.">
+                    <input id="dr-elo-${i}" class="flex-grow p-2 border rounded-xl text-xs" placeholder="Elo.">
+                </div>`;
+                r.innerHTML += `<div class="p-4 bg-slate-50 border rounded-2xl"><h4 class="font-black text-xs">${n}</h4><div class="grid grid-cols-4 gap-2 mt-2">${['spk','lis','rea','wri','gra','voc','par','pre'].map(k=>`<input id="rc-${k}-${i}" placeholder="${k}" class="p-1 border text-xs">`).join('')}</div><textarea id="rc-com-${i}" class="w-full mt-2 text-xs h-10 p-2"></textarea></div>`;
             });
-            atualizarStringPresenca();
-            lucide.createIcons();
             state.isReady = true;
         }
 
         function setPresenca(i, s) {
-            state.presenca[i] = s;
-            const p = document.getElementById(`btn-p-${i}`), f = document.getElementById(`btn-f-${i}`);
-            const d = document.getElementById(`dr-dif-${i}`), e = document.getElementById(`dr-elo-${i}`);
-            if(s==='P') {
-                p.className = "px-3 py-1 bg-green-500 text-white text-[10px] font-bold rounded-md shadow-sm";
-                f.className = "px-3 py-1 text-slate-500 text-[10px] font-bold rounded-md";
-                d.disabled = false; e.disabled = false; d.classList.remove('opacity-50','bg-slate-50'); e.classList.remove('opacity-50','bg-slate-50');
-            } else {
-                f.className = "px-3 py-1 bg-red-500 text-white text-[10px] font-bold rounded-md shadow-sm";
-                p.className = "px-3 py-1 text-slate-500 text-[10px] font-bold rounded-md";
-                d.value = ''; e.value = ''; d.disabled = true; e.disabled = true; d.classList.add('opacity-50','bg-slate-50'); e.classList.add('opacity-50','bg-slate-50');
-            }
-            atualizarStringPresenca();
+            state.presencas[i] = s;
+            document.getElementById(`btn-p-${i}`).className = s==='P' ? "px-4 py-1.5 rounded bg-green-500 text-white text-[10px]" : "px-4 py-1.5 rounded text-slate-400 text-[10px]";
+            document.getElementById(`btn-f-${i}`).className = s==='F' ? "px-4 py-1.5 rounded bg-red-500 text-white text-[10px]" : "px-4 py-1.5 rounded text-slate-400 text-[10px]";
+            atualizarStringsPresenca();
             gatilhoAutoSave();
         }
 
-        function atualizarStringPresenca() {
-            let pres = [], abs = [];
-            state.alunos.forEach((n, i) => state.presenca[i] === 'P' ? pres.push(n) : abs.push(n));
-            document.getElementById('dr-attendance').value = pres.join(', ');
-            document.getElementById('dr-absence').value = abs.join(', ');
+        function atualizarStringsPresenca() {
+            const p = state.alunos.filter((n,i)=>state.presencas[i]==='P'), a = state.alunos.filter((n,i)=>state.presencas[i]==='F');
+            document.getElementById('strPres').innerText = "PRES: " + p.join(', ');
+            document.getElementById('strAbs').innerText = "FALT: " + a.join(', ');
+            document.getElementById('boxAttendanceStrings').classList.remove('hidden');
         }
 
         async function buscarDadosData() {
             const t = document.getElementById('selectTurma').value, d = document.getElementById('inputData').value;
-            if(!t || !d) return;
-            state.isReady = false; // Bloqueia auto-save no load
-            showLoader("Buscando registros...");
+            if (!t || !d) return;
+            state.isReady = false;
+            toggleLoader(true);
             try {
-                const res = await callAPI({ acao: "buscar_dados", turma: t, data: formatarData(d) });
-                if(res.status === "Sucesso" && res.dados) {
+                const parts = d.split('-');
+                const res = await callAPI({ acao: "buscar_dados", turma: t, data: `${parts[2]}/${parts[1]}/${parts[0]}` });
+                if (res.status === "Sucesso" && res.dados) {
                     const g = res.dados;
                     document.getElementById('dr-teacher').value = g.teacher || "";
                     document.getElementById('dr-conteudo').value = g.lessonPlan || "";
                     document.getElementById('dr-atividades').value = g.extraActivity || "";
                     document.getElementById('dr-proxima').value = g.objectives || "";
-                    document.getElementById('dr-obs').value = g.observation || "";
-                    
                     const absArr = (g.absence || "").toLowerCase().split(',').map(s=>s.trim());
-                    state.alunos.forEach((n, i) => {
-                        const isAbs = absArr.some(a => a && (a.includes(n.toLowerCase()) || n.toLowerCase().includes(a)));
-                        setPresenca(i, isAbs ? 'F' : 'P');
-                    });
+                    state.alunos.forEach((n,i)=>setPresenca(i, absArr.includes(n.toLowerCase()) ? 'F' : 'P'));
                 }
-            } catch(e) {} finally { hideLoader(); state.isReady = true; }
+            } finally { toggleLoader(false); state.isReady = true; }
         }
 
-        async function salvarDiario(isAuto = false) {
-            if(isSaving) return;
+        async function salvarDadosDiario(isAuto = false) {
+            if (state.isSaving) return;
+            state.isSaving = true;
             const t = document.getElementById('selectTurma').value, d = document.getElementById('inputData').value;
-            if(!t || !d) return;
-            isSaving = true;
-            const payload = {
-                acao: "salvar_tudo", turma: t, data: formatarData(d), docUrl: state.docDiarioUrl || "",
-                attendance: document.getElementById('dr-attendance').value,
-                absence: document.getElementById('dr-absence').value,
-                teacher: document.getElementById('dr-teacher').value,
-                report: {
-                    conteudo: document.getElementById('dr-conteudo').value,
-                    atividades: document.getElementById('dr-atividades').value,
-                    ateOnde: document.getElementById('dr-ateOnde').value,
-                    dificuldadesGerais: document.getElementById('dr-dificuldades').value,
-                    pontosPositivos: document.getElementById('dr-positivos').value,
-                    proximaAula: document.getElementById('dr-proxima').value,
-                    observacoes: document.getElementById('dr-obs').value
-                },
-                alunos: state.alunos.map((n, i) => ({
-                    nome: n,
-                    dificuldade: document.getElementById(`dr-dif-${i}`).value,
-                    elogio: document.getElementById(`dr-elo-${i}`).value
-                }))
-            };
-
-            try {
-                const res = await callAPI(payload);
-                if(res.status === "Sucesso") {
-                    if(res.docUrl) {
-                        state.docDiarioUrl = res.docUrl;
-                        const l = document.getElementById('linkDocDiario'); l.href = res.docUrl; l.classList.remove('hidden');
-                    }
-                    if(isAuto) setStatusSalvo(true);
-                    else showToast("Sucesso", "Dados guardados no Drive.");
-                }
-            } catch(e) { if(isAuto) setStatusSalvo(false); }
-            finally { isSaving = false; autoSaveTimer = null; }
-        }
-
-        async function gerarReportCards() {
-            const t = document.getElementById('selectTurma').value, m = document.getElementById('rc-month')?.value || "Trimestral";
-            if(!t) return;
-            showLoader("Gerando Documentos...");
+            const parts = d.split('-');
             try {
                 const res = await callAPI({
-                    acao: "gerar_report_cards", turma: t, mes: m, teacher: document.getElementById('dr-teacher').value,
-                    level: "Advanced", classType: "Standard", frequency: "Weekly",
-                    alunos: state.alunos.map((n, i) => ({
-                        nome: n,
-                        speaking: document.getElementById(`rc-spk-${i}`).value,
-                        listening: document.getElementById(`rc-lis-${i}`).value,
-                        reading: document.getElementById(`rc-rea-${i}`).value,
-                        writing: document.getElementById(`rc-wri-${i}`).value,
-                        grammar: document.getElementById(`rc-gra-${i}`).value,
-                        vocab: document.getElementById(`rc-voc-${i}`).value,
-                        participation: document.getElementById(`rc-par-${i}`).value,
-                        preparation: document.getElementById(`rc-pre-${i}`).value,
+                    acao: "salvar_tudo", turma: t, data: `${parts[2]}/${parts[1]}/${parts[0]}`,
+                    attendance: state.alunos.filter((n,i)=>state.presencas[i]==='P').join(', '),
+                    absence: state.alunos.filter((n,i)=>state.presencas[i]==='F').join(', '),
+                    teacher: document.getElementById('dr-teacher').value,
+                    report: {
+                        conteudo: document.getElementById('dr-conteudo').value,
+                        atividades: document.getElementById('dr-atividades').value,
+                        proximaAula: document.getElementById('dr-proxima').value,
+                        dificuldadesGerais: document.getElementById('dr-dificuldades').value
+                    },
+                    alunos: state.alunos.map((n,i)=>({ nome:n, dificuldade: document.getElementById(`dr-dif-${i}`).value, elogio: document.getElementById(`dr-elo-${i}`).value }))
+                });
+                if (res.docUrl) { state.docUrl = res.docUrl; document.getElementById('btnLinkDocs').href = res.docUrl; document.getElementById('btnLinkDocs').classList.remove('hidden'); }
+                setStatusSincronizado(true);
+            } catch(e) { setStatusSincronizado(false); }
+            finally { state.isSaving = false; autoSaveTimeout = null; }
+        }
+
+        function forcarSalvamento() { salvarDadosDiario(false); }
+
+        async function gerarReportCards() {
+            toggleLoader(true);
+            try {
+                const res = await callAPI({
+                    acao: "gerar_report_cards", turma: document.getElementById('selectTurma').value, mes: document.getElementById('rcMonth').value,
+                    teacher: document.getElementById('dr-teacher').value, level: document.getElementById('rcLevel').value,
+                    classType: document.getElementById('rcType').value, frequency: document.getElementById('rcFreq').value,
+                    alunos: state.alunos.map((n,i)=>({
+                        nome:n, speaking: document.getElementById(`rc-spk-${i}`).value, listening: document.getElementById(`rc-lis-${i}`).value,
+                        reading: document.getElementById(`rc-rea-${i}`).value, writing: document.getElementById(`rc-wri-${i}`).value,
+                        grammar: document.getElementById(`rc-gra-${i}`).value, vocabulary: document.getElementById(`rc-voc-${i}`).value,
+                        participation: document.getElementById(`rc-par-${i}`).value, preparation: document.getElementById(`rc-pre-${i}`).value,
                         comment: document.getElementById(`rc-com-${i}`).value
                     }))
                 });
-                if(res.url) {
-                    const l = document.getElementById('linkDocRC'); l.href = res.url; l.classList.remove('hidden');
-                    showToast("Sucesso", "Report Cards gerados com sucesso.");
-                }
-            } catch(e) {} finally { hideLoader(); }
+                if (res.url) { document.getElementById('btnDocCards').href = res.url; document.getElementById('btnDocCards').classList.remove('hidden'); }
+            } finally { toggleLoader(false); }
         }
-
-        function formatarData(iso) { const p = iso.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
     </script>
 </body>
 </html>
