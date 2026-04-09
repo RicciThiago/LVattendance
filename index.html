@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassManager Omni V5</title>
+    <title>ClassManager Omni V5 - Blindado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -35,7 +35,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Loader (Apenas para ações manuais bloqueantes) -->
+    <!-- Loader -->
     <div id="loader" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex-col items-center justify-center">
         <div class="spinner mb-4"></div>
         <p class="text-white font-medium tracking-wide" id="loaderText">Processando...</p>
@@ -45,7 +45,7 @@
     <div id="toastContainer" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-40">
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-200">
         <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2 text-blue-600">
                 <i data-lucide="graduation-cap" class="w-8 h-8"></i>
@@ -65,7 +65,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div class="flex flex-col md:flex-row gap-4 items-end">
                 <div class="flex-grow w-full">
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">URL do Google Apps Script (Fica salvo automaticamente)</label>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">URL do Google Apps Script (Web App)</label>
                     <div class="relative">
                         <i data-lucide="link" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
                         <input type="password" id="apiUrl" onchange="salvarURL()" placeholder="https://script.google.com/macros/s/..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
@@ -78,9 +78,9 @@
 
             <div id="contextArea" class="hidden mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-8">
                 
-                <div class="md:col-span-7 flex flex-col gap-6">
+                <div class="md:col-span-7 flex flex-col gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Selecione a Turma</label>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Turma</label>
                         <div class="relative">
                             <select id="selectTurma" onchange="aoMudarTurma()" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm text-lg font-medium text-slate-800">
                                 <option value="">Selecione uma turma...</option>
@@ -88,30 +88,28 @@
                             <i data-lucide="chevron-down" class="w-5 h-5 absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
                         </div>
                     </div>
-                    
-                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4 mt-auto">
-                        <h4 class="font-bold text-blue-900 mb-2 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Auto-Save Ativo</h4>
-                        <p class="text-sm text-blue-800/80">
-                            Não é necessário clicar em "Salvar Diário" a toda hora. Ao preencher os campos abaixo ou marcar presença, o sistema salvará automaticamente após você parar de digitar.
+                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
+                        <h4 class="font-bold text-blue-900 mb-1 flex items-center gap-2 text-sm"><i data-lucide="zap" class="w-4 h-4"></i> Auto-Save Ativo</h4>
+                        <p class="text-xs text-blue-800/80">
+                            Qualquer alteração será salva automaticamente no Sheets e Docs após 2 segundos de inatividade.
                         </p>
                     </div>
                 </div>
 
                 <!-- MONTHLY CALENDAR -->
-                <div class="md:col-span-5 flex justify-center md:justify-end">
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 w-full max-w-[320px] shadow-sm">
-                        <div class="flex justify-between items-center mb-4 px-1">
-                            <button onclick="mudarMes(-1)" class="p-1.5 hover:bg-white border border-transparent hover:border-slate-300 rounded-lg text-slate-600 transition-all"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-                            <h4 id="monthYearDisplay" class="font-bold text-slate-800 uppercase text-sm tracking-wide">Mês Ano</h4>
-                            <button onclick="mudarMes(1)" class="p-1.5 hover:bg-white border border-transparent hover:border-slate-300 rounded-lg text-slate-600 transition-all"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                <div class="md:col-span-5">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <button onclick="mudarMes(-1)" class="p-1 hover:bg-white border rounded text-slate-600"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                            <h4 id="monthYearDisplay" class="font-bold text-slate-800 text-xs uppercase tracking-widest">Mês Ano</h4>
+                            <button onclick="mudarMes(1)" class="p-1 hover:bg-white border rounded text-slate-600"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                         </div>
-                        <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-2">
-                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-2">
+                            <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
                         </div>
-                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center text-sm">
-                            <!-- Gerado via JS -->
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
+                            <!-- JS -->
                         </div>
-                        <!-- Input oculto para manter a compatibilidade da data -->
                         <input type="hidden" id="inputData">
                     </div>
                 </div>
@@ -122,33 +120,31 @@
         <!-- MAIN WORKSPACE -->
         <div id="workspaceArea" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             
-            <!-- TABS -->
             <div class="flex border-b border-slate-200 px-6 pt-2 bg-slate-50">
-                <button onclick="switchTab('tab-daily')" id="btn-tab-daily" class="tab-active px-6 py-3 text-sm flex items-center gap-2 transition-colors">
+                <button onclick="switchTab('tab-daily')" id="btn-tab-daily" class="tab-active px-6 py-3 text-sm flex items-center gap-2">
                     <i data-lucide="book-open" class="w-4 h-4"></i> Diário de Aula
                 </button>
-                <button onclick="switchTab('tab-reports')" id="btn-tab-reports" class="tab-inactive px-6 py-3 text-sm flex items-center gap-2 transition-colors">
-                    <i data-lucide="award" class="w-4 h-4"></i> Report Cards (Trimestral)
+                <button onclick="switchTab('tab-reports')" id="btn-tab-reports" class="tab-inactive px-6 py-3 text-sm flex items-center gap-2">
+                    <i data-lucide="award" class="w-4 h-4"></i> Report Cards
                 </button>
             </div>
 
             <!-- TAB 1: DAILY REPORT -->
             <div id="tab-daily" class="p-6 space-y-8">
                 
-                <!-- Avaliação Individual & Presença Automática -->
                 <div>
                     <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2">
-                        <i data-lucide="users" class="w-5 h-5 text-blue-500"></i> Presença e Acompanhamento Individual
+                        <i data-lucide="users" class="w-5 h-5 text-blue-500"></i> Presença e Notas do Dia
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Attendance (Presentes)</label>
-                            <input type="text" id="dr-attendance" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-700 outline-none" readonly>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Presentes (Attendance)</label>
+                            <input type="text" id="dr-attendance" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none" readonly>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Absence (Faltas)</label>
-                            <input type="text" id="dr-absence" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-700 outline-none" readonly>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Faltas (Absence)</label>
+                            <input type="text" id="dr-absence" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-md text-sm outline-none" readonly>
                         </div>
                     </div>
 
@@ -157,59 +153,57 @@
                     </div>
                 </div>
 
-                <!-- Relatório da Aula -->
                 <div>
                     <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mb-4 flex items-center gap-2">
                         <i data-lucide="file-text" class="w-5 h-5 text-blue-500"></i> Relatório da Aula
                     </h3>
                     
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Teacher</label>
-                        <input type="text" id="dr-teacher" class="w-full md:w-1/3 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Professor(a)</label>
+                        <input type="text" id="dr-teacher" class="w-full md:w-1/3 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Conteúdo trabalhado na aula</label>
-                                <textarea id="dr-conteudo" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Conteúdo trabalhado</label>
+                                <textarea id="dr-conteudo" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Atividades realizadas</label>
-                                <textarea id="dr-atividades" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                                <textarea id="dr-atividades" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Até onde foi o conteúdo</label>
-                                <textarea id="dr-ateOnde" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                                <textarea id="dr-ateOnde" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
                             </div>
                         </div>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Dificuldades gerais da turma</label>
-                                <textarea id="dr-dificuldades" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Dificuldades da turma</label>
+                                <textarea id="dr-dificuldades" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Pontos positivos da aula</label>
-                                <textarea id="dr-positivos" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Pontos positivos</label>
+                                <textarea id="dr-positivos" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Próxima aula</label>
-                                <textarea id="dr-proxima" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                                <textarea id="dr-proxima" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
                             </div>
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Observações</label>
-                            <textarea id="dr-obs" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Observações extras</label>
+                            <textarea id="dr-obs" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Botão Salvar Diário Manual -->
                 <div class="pt-6 border-t border-slate-100 flex justify-between items-center">
-                    <span class="text-xs text-slate-400 italic">* O salvamento ocorre automaticamente.</span>
+                    <span class="text-xs text-slate-400 italic font-medium flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> Salvamento automático habilitado.</span>
                     <div class="flex gap-4 items-center">
-                        <a id="linkDocDiario" href="#" target="_blank" class="hidden text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir Docs</a>
-                        <button onclick="salvarDiario(false)" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2">
+                        <a id="linkDocDiario" href="#" target="_blank" class="hidden text-blue-600 hover:text-blue-800 font-bold text-sm flex items-center gap-1"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir Relatório Drive</a>
+                        <button onclick="salvarDiario(false)" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2 transform active:scale-95">
                             <i data-lucide="save" class="w-4 h-4"></i> Forçar Salvamento
                         </button>
                     </div>
@@ -218,44 +212,13 @@
 
             <!-- TAB 2: REPORT CARDS -->
             <div id="tab-reports" class="hidden p-6 space-y-8">
-                
-                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
-                    <p class="text-sm text-blue-800 flex items-start gap-2">
-                        <i data-lucide="info" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
-                        Esta aba gera um documento finalizado para os alunos. Preencha os dados abaixo e as notas (1 a 5) para gerar o PDF/Doc Trimestral.
-                    </p>
-                </div>
-
-                <!-- Info Cabeçalho -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Level</label>
-                        <input type="text" id="rc-level" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Class Type</label>
-                        <input type="text" id="rc-type" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Frequency</label>
-                        <input type="text" id="rc-freq" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Month/Quarter</label>
-                        <input type="text" id="rc-month" placeholder="Ex: Oct/Nov/Dec" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                </div>
-
-                <!-- Notas Alunos -->
                 <div id="studentsReportCardList" class="space-y-6">
-                    <!-- Gerado via JS -->
+                    <!-- JS -->
                 </div>
-
-                <!-- Botão Gerar -->
                 <div class="pt-6 border-t border-slate-100 flex justify-end items-center gap-4">
-                    <a id="linkDocRC" href="#" target="_blank" class="hidden text-green-600 hover:text-green-800 font-medium text-sm flex items-center gap-1"><i data-lucide="external-link" class="w-4 h-4"></i> Abrir Report Cards</a>
-                    <button onclick="gerarReportCards()" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2 transform hover:-translate-y-0.5">
-                        <i data-lucide="file-text" class="w-5 h-5"></i> Gerar Report Cards
+                    <a id="linkDocRC" href="#" target="_blank" class="hidden text-green-600 hover:text-green-800 font-bold text-sm flex items-center gap-1"><i data-lucide="external-link" class="w-4 h-4"></i> Ver Report Cards</a>
+                    <button onclick="gerarReportCards()" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2 transform active:scale-95">
+                        <i data-lucide="file-text" class="w-5 h-5"></i> Gerar Report Cards Trimestrais
                     </button>
                 </div>
             </div>
@@ -264,461 +227,258 @@
     </main>
 
     <script>
-        // ESTADO GLOBAL E VARIÁVEIS
+        // ESTADO GLOBAL
         const state = {
             alunos: [],
             presenca: [], 
             docDiarioUrl: null,
             navDate: new Date(),
-            selectedDateStr: ""
+            selectedDateStr: "",
+            isReady: false
         };
 
         let autoSaveTimer = null;
-        let isFetching = false; // Evita loopings se o auto-save bater com o fetch
+        let isSaving = false;
 
-        // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             
-            // 1. Puxa URL salva do LocalStorage
             const savedUrl = localStorage.getItem('omniApiUrl');
-            if(savedUrl) {
-                document.getElementById('apiUrl').value = savedUrl;
-            }
+            if(savedUrl) document.getElementById('apiUrl').value = savedUrl;
 
-            // 2. Configura a Data Inicial no Calendário
             const hoje = new Date();
             state.selectedDateStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
             document.getElementById('inputData').value = state.selectedDateStr;
             renderizarCalendario();
 
-            // 3. Listener Global para Auto-Save no Formulário Diário
+            // Ativa Auto-save apenas em inputs de texto
             document.getElementById('tab-daily').addEventListener('input', (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    if(!isFetching) gatilhoAutoSave();
+                if (state.isReady && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+                    gatilhoAutoSave();
                 }
             });
         });
 
-        // ==========================================
-        // AUTO-SAVE E UI STATUS
-        // ==========================================
+        // --- COMUNICAÇÃO API BLINDADA ---
+        async function callAPI(payload) {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (!url) {
+                showToast("Configuração", "Por favor, insira o URL do App da Web.", "error");
+                throw new Error("URL vazia");
+            }
 
+            try {
+                // O segredo para GAS: redirect: 'follow' e body stringificado
+                const response = await fetch(url, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload),
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                if (!response.ok) throw new Error("Erro na rede: " + response.statusText);
+                
+                const data = await response.json();
+                if(data.status === "Erro") throw new Error(data.mensagem);
+                return data;
+            } catch (err) {
+                console.error("API Error:", err);
+                showToast("Erro de Conexão", err.message, "error");
+                throw err;
+            }
+        }
+
+        // --- AUTO-SAVE LOGIC ---
         function gatilhoAutoSave() {
-            const turma = document.getElementById('selectTurma').value;
-            const dataStr = document.getElementById('inputData').value;
-            if(!turma || !dataStr) return;
-
-            // Mostra UI de digitando
             const ind = document.getElementById('autoSaveIndicator');
             ind.classList.remove('hidden');
             ind.classList.add('flex');
-            ind.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4 text-amber-500 animate-spin"></i><span class="text-amber-600 font-semibold">Salvando...</span>`;
+            ind.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 text-amber-500 animate-spin"></i><span class="text-amber-600 font-bold">Salvando...</span>`;
             lucide.createIcons();
 
             clearTimeout(autoSaveTimer);
-            // Salva 2.5 segundos após a última digitação/clique
             autoSaveTimer = setTimeout(() => {
                 salvarDiario(true); 
-            }, 2500);
+            }, 2000);
         }
 
-        function setAutoSaveSucesso() {
+        function setStatusSalvo(sucesso = true) {
             const ind = document.getElementById('autoSaveIndicator');
-            ind.classList.remove('hidden');
-            ind.classList.add('flex');
-            ind.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i><span class="text-green-700 font-semibold">Salvo no Drive</span>`;
+            if(sucesso) {
+                ind.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i><span class="text-green-700 font-bold">Salvo com Sucesso!</span>`;
+            } else {
+                ind.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i><span class="text-red-700 font-bold">Erro ao Salvar</span>`;
+            }
             lucide.createIcons();
+            setTimeout(() => { if(!autoSaveTimer) ind.classList.add('hidden'); }, 3000);
+        }
+
+        // --- UI UTILS ---
+        function showLoader(text = "Processando...") {
+            document.getElementById('loaderText').innerText = text;
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('loader').classList.add('flex');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('loader').classList.remove('flex');
+        }
+
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const colors = type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800';
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+
+            toast.className = `toast-enter flex items-start gap-3 p-4 min-w-[320px] border rounded-xl shadow-xl ${colors}`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i><div><h4 class="font-bold text-sm">${title}</h4><p class="text-xs opacity-90 mt-1">${message}</p></div>`;
             
-            setTimeout(() => {
-                if(!autoSaveTimer) { // Se não tiver nada digitando de novo
-                    ind.classList.add('hidden'); ind.classList.remove('flex');
-                }
-            }, 4000);
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+            requestAnimationFrame(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-enter-active'); });
+            setTimeout(() => { toast.remove(); }, 4000);
         }
-
-        function setAutoSaveErro() {
-            const ind = document.getElementById('autoSaveIndicator');
-            ind.classList.remove('hidden');
-            ind.classList.add('flex');
-            ind.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i><span class="text-red-700 font-semibold">Erro ao salvar</span>`;
-            lucide.createIcons();
-        }
-
-        // ==========================================
-        // UTILITÁRIOS GERAIS
-        // ==========================================
 
         function salvarURL() {
             const url = document.getElementById('apiUrl').value.trim();
             if(url) localStorage.setItem('omniApiUrl', url);
         }
 
-        function showLoader(text = "Processando...") {
-            document.getElementById('loaderText').innerText = text;
-            const l = document.getElementById('loader');
-            l.classList.remove('hidden');
-            l.classList.add('flex');
-        }
-
-        function hideLoader() {
-            const l = document.getElementById('loader');
-            l.classList.add('hidden');
-            l.classList.remove('flex');
-        }
-
-        function showToast(title, message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            
-            const colors = type === 'success' ? 'bg-green-50 border-green-200 text-green-800 shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 
-                           type === 'error' ? 'bg-red-50 border-red-200 text-red-800 shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 
-                           'bg-blue-50 border-blue-200 text-blue-800 shadow-[0_4px_12px_rgba(0,0,0,0.05)]';
-            
-            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info';
-
-            toast.className = `toast-enter pointer-events-auto flex items-start gap-3 p-4 min-w-[300px] border rounded-xl shadow-lg ${colors}`;
-            toast.innerHTML = `
-                <i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
-                <div class="flex-grow">
-                    <h4 class="font-bold text-sm tracking-tight">${title}</h4>
-                    <p class="text-sm opacity-90 mt-0.5 leading-tight">${message}</p>
-                </div>
-            `;
-            
-            container.appendChild(toast);
-            lucide.createIcons({ root: toast });
-
-            requestAnimationFrame(() => {
-                toast.classList.remove('toast-enter');
-                toast.classList.add('toast-enter-active');
-            });
-
-            setTimeout(() => {
-                toast.classList.remove('toast-enter-active');
-                toast.classList.add('toast-exit');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        async function callAPI(payload) {
-            salvarURL(); // Garante que foi salva
-            const url = document.getElementById('apiUrl').value.trim();
-            if (!url) {
-                showToast("Erro", "Insira o URL do App da Web.", "error");
-                throw new Error("URL vazia");
-            }
-
-            try {
-                const response = await fetch(url, { method: 'POST', body: JSON.stringify(payload) });
-                const text = await response.text();
-                try {
-                    const data = JSON.parse(text);
-                    if(data.status === "Erro") throw new Error(data.mensagem);
-                    return data;
-                } catch (e) {
-                    if(text.includes('html')) throw new Error("A resposta não é JSON. O acesso da URL deve ser 'Qualquer pessoa'.");
-                    throw new Error(e.message || "Erro de servidor.");
-                }
-            } catch (err) {
-                throw err;
-            }
-        }
-
         function switchTab(tabId) {
             document.getElementById('tab-daily').classList.add('hidden');
             document.getElementById('tab-reports').classList.add('hidden');
             document.getElementById(tabId).classList.remove('hidden');
-
-            document.getElementById('btn-tab-daily').className = 'px-6 py-3 text-sm flex items-center gap-2 transition-colors tab-inactive';
-            document.getElementById('btn-tab-reports').className = 'px-6 py-3 text-sm flex items-center gap-2 transition-colors tab-inactive';
-            
-            document.getElementById('btn-' + tabId).className = 'px-6 py-3 text-sm flex items-center gap-2 transition-colors tab-active';
+            document.getElementById('btn-tab-daily').className = 'px-6 py-3 text-sm flex items-center gap-2 tab-inactive';
+            document.getElementById('btn-tab-reports').className = 'px-6 py-3 text-sm flex items-center gap-2 tab-inactive';
+            document.getElementById('btn-' + tabId).className = 'px-6 py-3 text-sm flex items-center gap-2 tab-active';
         }
 
-        function formatarData(dataISO) {
-            if(!dataISO) return "";
-            const partes = dataISO.split('-');
-            if(partes.length !== 3) return dataISO;
-            return `${partes[2]}/${partes[1]}/${partes[0]}`;
-        }
-
-        // ==========================================
-        // LÓGICA DO CALENDÁRIO MENSAL
-        // ==========================================
-
+        // --- CALENDÁRIO ---
         function renderizarCalendario() {
-            const year = state.navDate.getFullYear();
-            const month = state.navDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            const formatter = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
-            document.getElementById('monthYearDisplay').innerText = formatter.format(state.navDate);
-            
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-
-            // Slots vazios
-            for(let i = 0; i < firstDay; i++) {
-                grid.innerHTML += `<div></div>`;
-            }
-
-            const hoje = new Date();
-            const todayStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-
-            // Dias do mês
-            for(let d = 1; d <= daysInMonth; d++) {
-                const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const isSelected = dayStr === state.selectedDateStr;
-                const isToday = dayStr === todayStr;
-
-                let btnClass = "w-8 h-8 mx-auto flex items-center justify-center rounded-lg cursor-pointer transition-all duration-200 ease-out text-[13px] ";
-                
-                if (isSelected) {
-                    btnClass += "bg-blue-600 text-white font-bold shadow-md transform scale-110";
-                } else if (isToday) {
-                    btnClass += "bg-blue-100 text-blue-800 font-bold hover:bg-blue-200 border border-blue-300";
-                } else {
-                    btnClass += "text-slate-700 hover:bg-slate-200 font-medium";
-                }
-
-                grid.innerHTML += `<div onclick="selecionarData('${dayStr}')" class="${btnClass}">${d}</div>`;
+            const y = state.navDate.getFullYear(), m = state.navDate.getMonth();
+            const first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
+            document.getElementById('monthYearDisplay').innerText = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(state.navDate);
+            const grid = document.getElementById('calendarGrid'); grid.innerHTML = '';
+            for(let i=0; i<first; i++) grid.innerHTML += `<div></div>`;
+            for(let d=1; d<=days; d++) {
+                const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const sel = ds === state.selectedDateStr;
+                grid.innerHTML += `<div onclick="selecionarData('${ds}')" class="w-7 h-7 mx-auto flex items-center justify-center rounded-lg cursor-pointer text-[11px] font-bold transition-all ${sel ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-200'}">${d}</div>`;
             }
         }
+        function mudarMes(v) { state.navDate.setMonth(state.navDate.getMonth() + v); renderizarCalendario(); }
+        function selecionarData(ds) { state.selectedDateStr = ds; document.getElementById('inputData').value = ds; renderizarCalendario(); buscarDadosData(); }
 
-        function mudarMes(offset) {
-            state.navDate.setMonth(state.navDate.getMonth() + offset);
-            renderizarCalendario();
-        }
-
-        function selecionarData(dateStr) {
-            state.selectedDateStr = dateStr;
-            document.getElementById('inputData').value = dateStr;
-            renderizarCalendario();
-            buscarDadosData();
-        }
-
-        // ==========================================
-        // COMUNICAÇÃO DE DADOS (Turmas, Alunos, Busca)
-        // ==========================================
-
+        // --- ACTIONS ---
         async function carregarTurmas() {
-            showLoader("Conectando ao Motor Omni...");
+            showLoader("Verificando Conexão...");
             try {
                 const res = await callAPI({ acao: "buscar_abas" });
-                if (res.status === "Sucesso" && res.abas) {
-                    const sel = document.getElementById('selectTurma');
-                    sel.innerHTML = '<option value="">Selecione uma turma...</option>';
-                    res.abas.forEach(aba => {
-                        sel.innerHTML += `<option value="${aba}">${aba}</option>`;
-                    });
-                    document.getElementById('contextArea').classList.remove('hidden');
-                    document.getElementById('autoSaveIndicator').classList.remove('hidden');
-                    document.getElementById('autoSaveIndicator').classList.add('flex');
-                    showToast("Conectado!", "Planilha acessada com sucesso. Selecione uma turma.", "success");
-                }
-            } catch(e) {
-                showToast("Erro na Conexão", e.message, "error");
-            } finally { hideLoader(); }
+                const sel = document.getElementById('selectTurma');
+                sel.innerHTML = '<option value="">Escolha a turma...</option>';
+                res.abas.forEach(aba => sel.innerHTML += `<option value="${aba}">${aba}</option>`);
+                document.getElementById('contextArea').classList.remove('hidden');
+                showToast("Online", "Acesso à planilha garantido.", "success");
+            } catch(e) {} finally { hideLoader(); }
         }
 
         async function aoMudarTurma() {
             const turma = document.getElementById('selectTurma').value;
-            const ws = document.getElementById('workspaceArea');
-            
-            if (!turma) { ws.classList.add('hidden'); return; }
-            
-            ws.classList.remove('hidden');
-            showLoader("Buscando Alunos...");
-            
+            if(!turma) return;
+            showLoader("Carregando Alunos...");
             try {
                 const res = await callAPI({ acao: "buscar_alunos", turma: turma });
-                if (res.status === "Sucesso") {
-                    state.alunos = res.alunos || [];
-                    state.presenca = [];
-                    state.alunos.forEach((_, i) => state.presenca[i] = 'P'); 
-                    
-                    renderizarListaAlunos();
-                    showToast("Turma Carregada", `${state.alunos.length} alunos encontrados.`, "info");
-                    
-                    if(state.selectedDateStr) {
-                        buscarDadosData();
-                    }
-                }
+                state.alunos = res.alunos || [];
+                state.presenca = state.alunos.map(() => 'P');
+                renderizarInterfaceAlunos();
+                document.getElementById('workspaceArea').classList.remove('hidden');
+                buscarDadosData();
             } catch(e) {} finally { hideLoader(); }
         }
 
-        function setPresenca(idx, status, isManual = true) {
-            state.presenca[idx] = status;
-            const btnP = document.getElementById(`btn-p-${idx}`);
-            const btnF = document.getElementById(`btn-f-${idx}`);
-            const inputDif = document.getElementById(`dr-dif-${idx}`);
-            const inputElo = document.getElementById(`dr-elo-${idx}`);
-            
-            if(status === 'P') {
-                btnP.className = "px-3 py-1.5 rounded-md text-xs font-bold bg-green-500 text-white shadow-sm transition-all";
-                btnF.className = "px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-all";
-                
-                inputDif.disabled = false; inputElo.disabled = false;
-                inputDif.classList.remove('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
-                inputElo.classList.remove('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
-            } else {
-                btnF.className = "px-3 py-1.5 rounded-md text-xs font-bold bg-red-500 text-white shadow-sm transition-all";
-                btnP.className = "px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-all";
-                
-                inputDif.value = ''; inputElo.value = '';
-                inputDif.disabled = true; inputElo.disabled = true;
-                inputDif.classList.add('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
-                inputElo.classList.add('opacity-50', 'bg-slate-100', 'cursor-not-allowed');
-            }
-            
-            atualizarCamposPresencaStr();
-            if(isManual && !isFetching) gatilhoAutoSave();
-        }
+        function renderizarInterfaceAlunos() {
+            const daily = document.getElementById('studentsDailyList'), rc = document.getElementById('studentsReportCardList');
+            daily.innerHTML = ''; rc.innerHTML = '';
+            const options = `<option value="">-</option><option value="5">5 - Exc.</option><option value="4">4 - Very Good</option><option value="3">3 - Good</option><option value="2">2 - Dev.</option><option value="1">1 - Needs Imp.</option>`;
 
-        function atualizarCamposPresencaStr() {
-            let presentes = [];
-            let faltas = [];
-            state.alunos.forEach((nome, idx) => {
-                if(state.presenca[idx] === 'P') presentes.push(nome);
-                else faltas.push(nome);
-            });
-            document.getElementById('dr-attendance').value = presentes.join(", ");
-            document.getElementById('dr-absence').value = faltas.join(", ");
-        }
-
-        function renderizarListaAlunos() {
-            const listDaily = document.getElementById('studentsDailyList');
-            const listRC = document.getElementById('studentsReportCardList');
-            listDaily.innerHTML = ''; listRC.innerHTML = '';
-
-            if (state.alunos.length === 0) return;
-
-            const scaleOptions = `
-                <option value="">-</option>
-                <option value="5">5 - Excellent</option>
-                <option value="4">4 - Very Good</option>
-                <option value="3">3 - Good</option>
-                <option value="2">2 - Developing</option>
-                <option value="1">1 - Needs Imp.</option>
-            `;
-
-            state.alunos.forEach((nome, idx) => {
-                // DAILY HTML
-                listDaily.innerHTML += `
-                    <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col lg:flex-row gap-4 items-center group hover:border-blue-300 transition-colors">
-                        <div class="w-full lg:w-1/3 font-semibold text-slate-800 flex items-center justify-between lg:justify-start gap-4">
-                            <span class="flex items-center gap-2 truncate text-[15px]"><i data-lucide="user" class="w-4 h-4 text-slate-400 group-hover:text-blue-500"></i> ${nome}</span>
-                            
-                            <div class="flex bg-slate-100 p-1 rounded-lg lg:ml-auto flex-shrink-0">
-                                <button onclick="setPresenca(${idx}, 'P')" id="btn-p-${idx}" class="px-3 py-1.5 rounded-md text-xs font-bold bg-green-500 text-white shadow-sm transition-all">P</button>
-                                <button onclick="setPresenca(${idx}, 'F')" id="btn-f-${idx}" class="px-3 py-1.5 rounded-md text-xs font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-all">F</button>
+            state.alunos.forEach((nome, i) => {
+                daily.innerHTML += `
+                    <div class="p-3 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col lg:flex-row gap-4 items-center">
+                        <div class="w-full lg:w-1/3 flex items-center justify-between">
+                            <span class="font-bold text-slate-700 text-sm truncate">${nome}</span>
+                            <div class="flex bg-slate-100 p-1 rounded-lg">
+                                <button onclick="setPresenca(${i},'P')" id="btn-p-${i}" class="px-3 py-1 bg-green-500 text-white text-[10px] font-bold rounded-md shadow-sm">P</button>
+                                <button onclick="setPresenca(${i},'F')" id="btn-f-${i}" class="px-3 py-1 text-slate-500 text-[10px] font-bold rounded-md">F</button>
                             </div>
                         </div>
-                        
-                        <div class="flex-grow flex gap-3 w-full lg:w-2/3">
-                            <input type="text" id="dr-dif-${idx}" placeholder="Dificuldades percebidas..." class="w-1/2 px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                            <input type="text" id="dr-elo-${idx}" placeholder="Elogios ou pontos positivos..." class="w-1/2 px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-md focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                        <div class="flex-grow flex gap-2 w-full lg:w-2/3">
+                            <input type="text" id="dr-dif-${i}" placeholder="Dificuldades..." class="w-1/2 px-3 py-2 text-xs border border-slate-200 rounded-md outline-none focus:border-blue-400">
+                            <input type="text" id="dr-elo-${i}" placeholder="Elogios..." class="w-1/2 px-3 py-2 text-xs border border-slate-200 rounded-md outline-none focus:border-blue-400">
                         </div>
-                    </div>
-                `;
-
-                // REPORT CARDS HTML
-                listRC.innerHTML += `
-                    <div class="p-5 bg-white border border-slate-200 shadow-sm rounded-xl">
-                        <h4 class="font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3 flex items-center gap-2">
-                            <i data-lucide="user" class="w-4 h-4 text-blue-500"></i> ${nome}
-                        </h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                            <div><label class="text-xs font-medium text-slate-500">Speaking</label><select id="rc-spk-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                            <div><label class="text-xs font-medium text-slate-500">Listening</label><select id="rc-lis-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                            <div><label class="text-xs font-medium text-slate-500">Reading</label><select id="rc-rea-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                            <div><label class="text-xs font-medium text-slate-500">Writing</label><select id="rc-wri-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                            <div><label class="text-xs font-medium text-slate-500">Grammar</label><select id="rc-gra-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                            <div><label class="text-xs font-medium text-slate-500">Vocabulary</label><select id="rc-voc-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                            <div><label class="text-xs font-medium text-slate-500">Participation</label><select id="rc-par-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                            <div><label class="text-xs font-medium text-slate-500">Preparation</label><select id="rc-pre-${idx}" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-1.5 focus:bg-white outline-none">${scaleOptions}</select></div>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-slate-500">Teacher's Comment</label>
-                            <textarea id="rc-com-${idx}" rows="2" class="w-full text-sm bg-slate-50 border border-slate-200 rounded p-2 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all"></textarea>
-                        </div>
-                    </div>
-                `;
+                    </div>`;
+                rc.innerHTML += `<div class="p-4 bg-slate-50 border rounded-xl shadow-sm"><h4 class="font-bold mb-3 text-sm">${nome}</h4><div class="grid grid-cols-4 gap-2 text-[10px]">${['spk','lis','rea','wri','gra','voc','par','pre'].map(k=>`<div><label class="block mb-1">${k.toUpperCase()}</label><select id="rc-${k}-${i}" class="w-full border rounded p-1">${options}</select></div>`).join('')}</div><textarea id="rc-com-${i}" placeholder="Comentário..." class="w-full mt-2 text-xs border rounded p-2 resize-none h-12 outline-none"></textarea></div>`;
             });
-            
-            atualizarCamposPresencaStr();
+            atualizarStringPresenca();
             lucide.createIcons();
+            state.isReady = true;
         }
 
-        function limparFormularioDiario() {
-            const ids = ['dr-teacher', 'dr-conteudo', 'dr-atividades', 'dr-ateOnde', 'dr-dificuldades', 'dr-positivos', 'dr-proxima', 'dr-obs'];
-            ids.forEach(id => document.getElementById(id).value = '');
-            
-            state.alunos.forEach((_, idx) => {
-                setPresenca(idx, 'P', false);
-                const elD = document.getElementById(`dr-dif-${idx}`);
-                const elE = document.getElementById(`dr-elo-${idx}`);
-                if(elD) elD.value = ''; if(elE) elE.value = '';
-            });
-            atualizarCamposPresencaStr();
-            
-            document.getElementById('linkDocDiario').classList.add('hidden');
-            state.docDiarioUrl = null;
+        function setPresenca(i, s) {
+            state.presenca[i] = s;
+            const p = document.getElementById(`btn-p-${i}`), f = document.getElementById(`btn-f-${i}`);
+            const d = document.getElementById(`dr-dif-${i}`), e = document.getElementById(`dr-elo-${i}`);
+            if(s==='P') {
+                p.className = "px-3 py-1 bg-green-500 text-white text-[10px] font-bold rounded-md shadow-sm";
+                f.className = "px-3 py-1 text-slate-500 text-[10px] font-bold rounded-md";
+                d.disabled = false; e.disabled = false; d.classList.remove('opacity-50','bg-slate-50'); e.classList.remove('opacity-50','bg-slate-50');
+            } else {
+                f.className = "px-3 py-1 bg-red-500 text-white text-[10px] font-bold rounded-md shadow-sm";
+                p.className = "px-3 py-1 text-slate-500 text-[10px] font-bold rounded-md";
+                d.value = ''; e.value = ''; d.disabled = true; e.disabled = true; d.classList.add('opacity-50','bg-slate-50'); e.classList.add('opacity-50','bg-slate-50');
+            }
+            atualizarStringPresenca();
+            gatilhoAutoSave();
+        }
+
+        function atualizarStringPresenca() {
+            let pres = [], abs = [];
+            state.alunos.forEach((n, i) => state.presenca[i] === 'P' ? pres.push(n) : abs.push(n));
+            document.getElementById('dr-attendance').value = pres.join(', ');
+            document.getElementById('dr-absence').value = abs.join(', ');
         }
 
         async function buscarDadosData() {
-            const turma = document.getElementById('selectTurma').value;
-            const dataInput = document.getElementById('inputData').value;
-            
-            if(!turma || !dataInput) return;
-
-            isFetching = true; // Bloqueia auto-save enquanto carrega
-            showLoader("Extraindo dados da nuvem...");
-            limparFormularioDiario();
-
+            const t = document.getElementById('selectTurma').value, d = document.getElementById('inputData').value;
+            if(!t || !d) return;
+            state.isReady = false; // Bloqueia auto-save no load
+            showLoader("Buscando registros...");
             try {
-                const res = await callAPI({ acao: "buscar_dados", turma: turma, data: formatarData(dataInput) });
-                if (res.status === "Sucesso" && res.dados) {
-                    const d = res.dados;
+                const res = await callAPI({ acao: "buscar_dados", turma: t, data: formatarData(d) });
+                if(res.status === "Sucesso" && res.dados) {
+                    const g = res.dados;
+                    document.getElementById('dr-teacher').value = g.teacher || "";
+                    document.getElementById('dr-conteudo').value = g.lessonPlan || "";
+                    document.getElementById('dr-atividades').value = g.extraActivity || "";
+                    document.getElementById('dr-proxima').value = g.objectives || "";
+                    document.getElementById('dr-obs').value = g.observation || "";
                     
-                    if(d.attendance !== undefined || d.absence !== undefined) {
-                        const absStr = (d.absence || "").toLowerCase();
-                        const absList = absStr.split(',').map(s => s.trim());
-                        
-                        state.alunos.forEach((nome, idx) => {
-                            const nomeLower = nome.toLowerCase();
-                            const isAbsent = absList.some(a => a.length > 2 && (a.includes(nomeLower) || nomeLower.includes(a)));
-                            setPresenca(idx, isAbsent ? 'F' : 'P', false);
-                        });
-                    }
-
-                    if(d.teacher) document.getElementById('dr-teacher').value = d.teacher;
-                    if(d.lessonPlan) document.getElementById('dr-conteudo').value = d.lessonPlan;
-                    if(d.extraActivity) document.getElementById('dr-atividades').value = d.extraActivity;
-                    if(d.objectives) document.getElementById('dr-proxima').value = d.objectives;
-                    if(d.observation) document.getElementById('dr-obs').value = d.observation;
+                    const absArr = (g.absence || "").toLowerCase().split(',').map(s=>s.trim());
+                    state.alunos.forEach((n, i) => {
+                        const isAbs = absArr.some(a => a && (a.includes(n.toLowerCase()) || n.toLowerCase().includes(a)));
+                        setPresenca(i, isAbs ? 'F' : 'P');
+                    });
                 }
-            } catch(e) {
-                console.error(e);
-            } finally { 
-                isFetching = false;
-                hideLoader(); 
-            }
+            } catch(e) {} finally { hideLoader(); state.isReady = true; }
         }
 
-        async function salvarDiario(isAutoSave = false) {
-            const turma = document.getElementById('selectTurma').value;
-            const dataInput = document.getElementById('inputData').value;
-            
-            if(!turma || !dataInput) return;
-
+        async function salvarDiario(isAuto = false) {
+            if(isSaving) return;
+            const t = document.getElementById('selectTurma').value, d = document.getElementById('inputData').value;
+            if(!t || !d) return;
+            isSaving = true;
             const payload = {
-                acao: "salvar_tudo",
-                turma: turma,
-                data: formatarData(dataInput),
-                docUrl: state.docDiarioUrl || "",
+                acao: "salvar_tudo", turma: t, data: formatarData(d), docUrl: state.docDiarioUrl || "",
                 attendance: document.getElementById('dr-attendance').value,
                 absence: document.getElementById('dr-absence').value,
                 teacher: document.getElementById('dr-teacher').value,
@@ -731,83 +491,56 @@
                     proximaAula: document.getElementById('dr-proxima').value,
                     observacoes: document.getElementById('dr-obs').value
                 },
-                alunos: state.alunos.map((nome, idx) => ({
-                    nome: nome,
-                    dificuldade: document.getElementById(`dr-dif-${idx}`) && !document.getElementById(`dr-dif-${idx}`).disabled ? document.getElementById(`dr-dif-${idx}`).value : "",
-                    elogio: document.getElementById(`dr-elo-${idx}`) && !document.getElementById(`dr-elo-${idx}`).disabled ? document.getElementById(`dr-elo-${idx}`).value : ""
+                alunos: state.alunos.map((n, i) => ({
+                    nome: n,
+                    dificuldade: document.getElementById(`dr-dif-${i}`).value,
+                    elogio: document.getElementById(`dr-elo-${i}`).value
                 }))
             };
 
-            if (!isAutoSave) showLoader("Salvando Diário Manualmente...");
-            
             try {
-                autoSaveTimer = null; // Libera timer de auto-save
                 const res = await callAPI(payload);
-                if (res.status === "Sucesso") {
-                    if (isAutoSave) {
-                        setAutoSaveSucesso();
-                    } else {
-                        showToast("Sucesso!", "Diário salvo e forçado manualmente.");
-                    }
-
+                if(res.status === "Sucesso") {
                     if(res.docUrl) {
                         state.docDiarioUrl = res.docUrl;
-                        const link = document.getElementById('linkDocDiario');
-                        link.href = res.docUrl;
-                        link.classList.remove('hidden');
+                        const l = document.getElementById('linkDocDiario'); l.href = res.docUrl; l.classList.remove('hidden');
                     }
-                } else {
-                    if(isAutoSave) setAutoSaveErro();
-                    else showToast("Erro", "Falha ao salvar. Tente novamente.", "error");
+                    if(isAuto) setStatusSalvo(true);
+                    else showToast("Sucesso", "Dados guardados no Drive.");
                 }
-            } catch(e) {
-                if(isAutoSave) setAutoSaveErro();
-            } finally { 
-                if(!isAutoSave) hideLoader(); 
-            }
+            } catch(e) { if(isAuto) setStatusSalvo(false); }
+            finally { isSaving = false; autoSaveTimer = null; }
         }
 
         async function gerarReportCards() {
-            const turma = document.getElementById('selectTurma').value;
-            if(!turma) { showToast("Atenção", "Selecione uma turma.", "error"); return; }
-            
-            const mes = document.getElementById('rc-month').value;
-            if(!mes) { showToast("Atenção", "Preencha o campo Month/Quarter.", "error"); return; }
-
-            const payload = {
-                acao: "gerar_report_cards",
-                turma: turma,
-                teacher: document.getElementById('dr-teacher').value || "Teacher",
-                level: document.getElementById('rc-level').value,
-                classType: document.getElementById('rc-type').value,
-                frequency: document.getElementById('rc-freq').value,
-                mes: mes,
-                alunos: state.alunos.map((nome, idx) => ({
-                    nome: nome,
-                    speaking: document.getElementById(`rc-spk-${idx}`).value,
-                    listening: document.getElementById(`rc-lis-${idx}`).value,
-                    reading: document.getElementById(`rc-rea-${idx}`).value,
-                    writing: document.getElementById(`rc-wri-${idx}`).value,
-                    grammar: document.getElementById(`rc-gra-${idx}`).value,
-                    vocab: document.getElementById(`rc-voc-${idx}`).value,
-                    participation: document.getElementById(`rc-par-${idx}`).value,
-                    preparation: document.getElementById(`rc-pre-${idx}`).value,
-                    comment: document.getElementById(`rc-com-${idx}`).value
-                }))
-            };
-
-            showLoader("Gerando Report Cards (PDF/Doc)...");
+            const t = document.getElementById('selectTurma').value, m = document.getElementById('rc-month')?.value || "Trimestral";
+            if(!t) return;
+            showLoader("Gerando Documentos...");
             try {
-                const res = await callAPI(payload);
-                if (res.status === "Sucesso" && res.url) {
-                    showToast("Sucesso!", "Report Cards gerados com sucesso no Google Drive.");
-                    const link = document.getElementById('linkDocRC');
-                    link.href = res.url;
-                    link.classList.remove('hidden');
+                const res = await callAPI({
+                    acao: "gerar_report_cards", turma: t, mes: m, teacher: document.getElementById('dr-teacher').value,
+                    level: "Advanced", classType: "Standard", frequency: "Weekly",
+                    alunos: state.alunos.map((n, i) => ({
+                        nome: n,
+                        speaking: document.getElementById(`rc-spk-${i}`).value,
+                        listening: document.getElementById(`rc-lis-${i}`).value,
+                        reading: document.getElementById(`rc-rea-${i}`).value,
+                        writing: document.getElementById(`rc-wri-${i}`).value,
+                        grammar: document.getElementById(`rc-gra-${i}`).value,
+                        vocab: document.getElementById(`rc-voc-${i}`).value,
+                        participation: document.getElementById(`rc-par-${i}`).value,
+                        preparation: document.getElementById(`rc-pre-${i}`).value,
+                        comment: document.getElementById(`rc-com-${i}`).value
+                    }))
+                });
+                if(res.url) {
+                    const l = document.getElementById('linkDocRC'); l.href = res.url; l.classList.remove('hidden');
+                    showToast("Sucesso", "Report Cards gerados com sucesso.");
                 }
             } catch(e) {} finally { hideLoader(); }
         }
 
+        function formatarData(iso) { const p = iso.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
     </script>
 </body>
 </html>
