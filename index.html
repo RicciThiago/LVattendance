@@ -1,264 +1,418 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassManager Omni V5 - Ultra Blindado</title>
+    <title>LV Idiomas - ClassManager Omni V6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], heading: ['Outfit', 'sans-serif']} } }
+        }
+    </script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        body { background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .glass { background: rgba(30, 41, 59, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        .glass-input { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: white; transition: all 0.3s ease; }
+        .glass-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); outline: none; }
+        
+        select option { background-color: #1e293b; color: white; }
 
-        /* Loader */
-        #loader { transition: opacity 0.3s ease; }
-        .spinner { border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; border-top: 4px solid white; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #3b82f6; width: 48px; height: 48px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Animations */
-        .toast-enter { transform: translateY(-20px); opacity: 0; }
-        .toast-active { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         
-        /* Calendar */
-        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem; transition: all 0.2s; }
-        .cal-day:hover { background-color: #e2e8f0; }
-        .cal-selected { background-color: #2563eb !important; color: white !important; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); }
-        .cal-today { border: 2px solid #2563eb; color: #2563eb; }
-
-        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 700; }
+        .toast-enter { transform: translateY(-100%); opacity: 0; }
+        .toast-active { transform: translateY(0); opacity: 1; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; color: #94a3b8; }
+        .cal-day:hover { background-color: rgba(59, 130, 246, 0.2); color: white; }
+        .cal-selected { background-color: rgba(59, 130, 246, 0.3) !important; color: white !important; font-weight: bold; border: 1px solid #3b82f6; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col pb-10">
+<body class="min-h-screen relative font-sans antialiased text-slate-200 pb-20">
 
-    <!-- Loader Overlay -->
-    <div id="loader" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex flex-col items-center justify-center">
-        <div class="spinner mb-4"></div>
-        <p class="text-white font-bold tracking-widest text-sm uppercase" id="loaderText">Sincronizando...</p>
+    <div id="loader" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[100] hidden flex flex-col items-center justify-center transition-all duration-300 opacity-0">
+        <div class="spinner mb-6"></div>
+        <p class="font-heading font-extrabold tracking-widest text-lg uppercase text-blue-400" id="loaderText">Sincronizando</p>
+        <p class="text-sm text-slate-400 mt-2 font-medium" id="loaderSubtext">Aguarde...</p>
     </div>
 
-    <!-- Toast Messages -->
-    <div id="toastContainer" class="fixed top-6 right-6 z-[110] flex flex-col gap-3 pointer-events-none"></div>
+    <div id="toastContainer" class="fixed top-6 left-1/2 -translate-x-1/2 z-[110] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- Top Navigation -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+    <header class="glass sticky top-0 z-50 border-b-0">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-blue-500/30">
+                    <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
                 </div>
-                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">ClassManager <span class="text-blue-600">Omni V5</span></h1>
+                <div>
+                    <h1 class="text-2xl font-heading font-extrabold tracking-tight text-white">LV Idiomas <span class="text-blue-400">Omni V6</span></h1>
+                    <p class="text-[10px] font-bold tracking-widest text-indigo-400 uppercase">Multi-Teacher Architecture</p>
+                </div>
             </div>
-            
-            <div id="syncStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                <div class="w-2 h-2 rounded-full bg-slate-300" id="syncDot"></div>
+            <div id="syncStatus" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/50 text-[10px] font-bold uppercase tracking-wider shadow-inner text-slate-300">
+                <div class="w-2 h-2 rounded-full bg-slate-500" id="syncDot"></div>
                 <span id="syncText">Offline</span>
             </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto w-full px-4 py-8 space-y-6">
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
 
-        <!-- CONFIGURATION CARD -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6">
-                <div class="flex flex-col md:flex-row gap-4 items-end">
-                    <div class="flex-grow w-full">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Configuração do Motor (Web App URL)</label>
-                        <div class="relative group">
-                            <i data-lucide="link-2" class="w-4 h-4 absolute left-3 top-3 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
-                            <input type="password" id="apiUrl" onchange="salvarURLLocal()" placeholder="Cole aqui o URL do seu script implantado..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium">
-                        </div>
-                    </div>
-                    <button onclick="conectarSistema()" class="w-full md:w-auto px-8 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95">
-                        <i data-lucide="zap" class="w-4 h-4"></i> Conectar
-                    </button>
+        <!-- SETUP CARD: Multi-teacher / Setup Global -->
+        <section class="glass rounded-3xl p-6 border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
+                <h3 class="font-heading text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="server" class="w-5 h-5 text-blue-400"></i> Servidor Global (Seu Apps Script)
+                </h3>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">URL Central (<span class="text-red-400">Apenas o seu!</span>)</label>
+                <input type="password" id="apiUrl" onchange="salvarAppConfig()" placeholder="https://script.google.com/.../exec" class="w-full px-5 py-3 glass-input rounded-xl text-sm font-medium">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <div class="space-y-4 border-r border-slate-700/50 pr-4">
+                    <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4"></i> Perfis de Professores
+                    </h4>
+                    <select id="selectProfile" onchange="carregarPerfil()" class="w-full px-5 py-3 glass-input rounded-xl font-bold text-sm cursor-pointer border-indigo-500">
+                        <option value="">+ Criar Novo Perfil de Professor</option>
+                    </select>
                 </div>
-
-                <!-- SELECTORS -->
-                <div id="contextArea" class="hidden mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-12 gap-8">
-                    <div class="md:col-span-7 space-y-6">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Turma Ativa</label>
-                            <div class="relative">
-                                <select id="selectTurma" onchange="selecionarTurma()" class="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl appearance-none focus:border-blue-500 outline-none font-bold text-slate-800 shadow-sm transition-all cursor-pointer">
-                                    <option value="">A carregar turmas...</option>
-                                </select>
-                                <i data-lucide="chevron-down" class="w-5 h-5 absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
-                            </div>
+                
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 gap-3">
+                        <input type="text" id="profName" placeholder="Nome do Professor (Ex: Teacher Paula)" class="w-full px-4 py-2 glass-input rounded-lg text-xs">
+                        <input type="text" id="profSheet" placeholder="ID da Planilha compartilhada com você" class="w-full px-4 py-2 glass-input rounded-lg text-xs">
+                        <input type="text" id="profFolder" placeholder="ID da Pasta do Google Drive deles" class="w-full px-4 py-2 glass-input rounded-lg text-xs">
+                        <div class="flex gap-2">
+                            <button onclick="salvarPerfil()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-bold transition-all"><i data-lucide="save" class="w-3 h-3 inline"></i> Salvar Perfil</button>
+                            <button onclick="excluirPerfil()" class="py-2 px-3 bg-red-900/50 hover:bg-red-800 text-red-200 rounded-lg text-xs transition-all"><i data-lucide="trash" class="w-3 h-3"></i></button>
                         </div>
-                        
-                        <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200 relative overflow-hidden group">
-                            <i data-lucide="check-circle" class="w-20 h-20 absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform"></i>
-                            <div class="relative z-10">
-                                <h4 class="font-extrabold flex items-center gap-2 mb-1"><i data-lucide="shield-check" class="w-5 h-5"></i> Modo Auto-Save</h4>
-                                <p class="text-[11px] font-medium opacity-90 leading-relaxed">
-                                    O sistema salva automaticamente na planilha e no Drive após 2 segundos sem digitação. Sem stress.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- MINI CALENDAR -->
-                    <div class="md:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-inner">
-                        <div class="flex justify-between items-center mb-4">
-                            <button onclick="navegarMes(-1)" class="p-1.5 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                            <span id="labelMes" class="text-[10px] font-black uppercase tracking-widest text-slate-500">Mês Ano</span>
-                            <button onclick="navegarMes(1)" class="p-1.5 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
-                        </div>
-                        <div class="grid grid-cols-7 gap-1 text-center text-[9px] font-black text-slate-400 mb-2 uppercase">
-                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-                        </div>
-                        <div id="gridCalendario" class="grid grid-cols-7 gap-1"></div>
-                        <input type="hidden" id="inputData">
                     </div>
                 </div>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-slate-700/50 flex justify-end">
+                <button onclick="conectarPlanilhaTeacher()" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-blue-900/50">
+                    <i data-lucide="zap" class="w-4 h-4"></i> Conectar Pasta e Planilha do Professor
+                </button>
             </div>
         </section>
 
-        <!-- WORKSPACE -->
-        <div id="workspaceArea" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[500px]">
-            <!-- TABS -->
-            <div class="flex px-6 pt-2 bg-slate-50 border-b border-slate-200">
-                <button onclick="abaAtiva('tab-daily')" id="btn-tab-daily" class="px-6 py-4 text-xs font-bold uppercase tracking-wider tab-active flex items-center gap-2 transition-all">
-                    <i data-lucide="calendar-days" class="w-4 h-4"></i> Diário de Aula
-                </button>
-                <button onclick="abaAtiva('tab-reports')" id="btn-tab-reports" class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 border-b-3 border-transparent flex items-center gap-2 transition-all">
-                    <i data-lucide="medal" class="w-4 h-4"></i> Report Cards
-                </button>
-            </div>
-
-            <!-- TAB: DAILY -->
-            <div id="tab-daily" class="p-6 space-y-10">
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                        <h3 class="text-sm font-black text-slate-800 uppercase tracking-tighter">1. Presença e Avaliação Individual</h3>
+        <!-- DASHBOARD (Hidden until connected) -->
+        <div id="dashboardArea" class="hidden space-y-6">
+            
+            <!-- CONTEXT PICKER -->
+            <section class="glass rounded-3xl p-6 border border-slate-700/50 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-800/40">
+                <div class="lg:col-span-8 flex flex-col gap-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Aba Ativa na Planilha</label>
+                    <select id="selectTurma" onchange="selecionarTurma()" class="w-full px-5 py-4 glass-input rounded-2xl text-lg font-bold border-blue-500/50">
+                    </select>
+                </div>
+                <div class="lg:col-span-4 bg-slate-900/50 rounded-2xl p-4 border border-slate-800">
+                    <div class="flex justify-between items-center mb-2">
+                        <button onclick="navegarMes(-1)"><i data-lucide="chevron-left" class="w-4 h-4 text-slate-400"></i></button>
+                        <span id="labelMes" class="text-xs font-bold uppercase text-slate-300">Março 2026</span>
+                        <button onclick="navegarMes(1)"><i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i></button>
                     </div>
-                    <div id="listaAlunosDiario" class="space-y-3"></div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 mb-1">
+                        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+                    </div>
+                    <div id="gridCalendario" class="grid grid-cols-7 gap-1"></div>
+                    <input type="hidden" id="inputData">
+                </div>
+            </section>
+
+            <!-- SINGLE PAGE SECTORS -->
+            
+            <!-- SECTOR 1: ABSENCE & ATTENDANCE -->
+            <section class="glass border-t-4 border-t-red-500 rounded-3xl p-8 relative">
+                <div class="absolute right-8 top-8 opacity-10"><i data-lucide="users-2" class="w-24 h-24"></i></div>
+                <h3 class="font-heading text-lg font-bold uppercase tracking-wider mb-6 flex items-center gap-3 text-red-400 relative z-10">
+                    <span class="bg-red-500/20 p-2 rounded-lg"><i data-lucide="user-check" class="w-5 h-5"></i></span>
+                    Setor 1: Presença e Registro Diário
+                </h3>
+                
+                <!-- Lesson Plan Row -->
+                <div class="mb-8 p-4 bg-slate-900/50 rounded-2xl border border-slate-700/50 flex flex-col sm:flex-row gap-4 items-center relative z-10">
+                    <div class="w-full sm:w-1/2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">LESSON PLAN CODE / LINK (Coluna E)</label>
+                        <div class="relative">
+                            <i data-lucide="link" class="w-4 h-4 absolute left-3 top-3.5 text-slate-500"></i>
+                            <input type="text" id="dr-lessoncode" oninput="gatilhoAutoSave()" placeholder="Cole o link ou código do Classroom/Plano" class="w-full pl-9 pr-4 py-3 glass-input rounded-xl text-sm font-medium">
+                        </div>
+                    </div>
+                    <a id="btnOpenLesson" href="#" target="_blank" onclick="abrirLessonPlan()" class="w-full sm:w-auto px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all mt-4 sm:mt-0">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> Acessar Link
+                    </a>
                 </div>
 
-                <div class="space-y-4">
-                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-tighter border-b border-slate-100 pb-2">2. Resumo da Aula</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Conteúdo</label><textarea id="dr-conteudo" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Atividades</label><textarea id="dr-atividades" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
-                        </div>
-                        <div class="space-y-4">
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Dificuldades</label><textarea id="dr-dificuldades" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase">Próxima Aula</label><textarea id="dr-proxima" class="w-full p-3 bg-slate-50 border rounded-xl text-sm"></textarea></div>
-                        </div>
+                <div id="listaAlunosDiario" class="flex flex-col gap-3 relative z-10"></div>
+            </section>
+            
+            <!-- SECTOR 2: PEDAGOGY -->
+            <section class="glass border-t-4 border-t-blue-500 rounded-3xl p-8 relative">
+                <div class="absolute right-8 top-8 opacity-10"><i data-lucide="book-open" class="w-24 h-24"></i></div>
+                <h3 class="font-heading text-lg font-bold uppercase tracking-wider mb-6 flex items-center gap-3 text-blue-400 relative z-10">
+                    <span class="bg-blue-500/20 p-2 rounded-lg"><i data-lucide="layout-template" class="w-5 h-5"></i></span>
+                    Setor 2: Planejamento Pedagógico
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                    <div class="space-y-4">
+                        <div class="relative"><label class="absolute -top-2.5 left-4 px-2 bg-slate-800 text-[10px] font-bold text-slate-300">Teacher</label><input type="text" id="dr-teacher" oninput="gatilhoAutoSave()" class="w-full p-4 glass-input rounded-xl text-sm font-medium"></div>
+                        <div class="relative"><label class="absolute -top-2.5 left-4 px-2 bg-slate-800 text-[10px] font-bold text-slate-300">Conteúdo Trabalhado</label><textarea id="dr-conteudo" oninput="gatilhoAutoSave()" rows="3" class="w-full p-4 glass-input rounded-xl text-sm"></textarea></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-6">
-                        <input type="text" id="dr-teacher" placeholder="Teacher" class="p-3 bg-slate-50 border rounded-xl text-sm">
-                        <input type="text" id="dr-ateOnde" placeholder="Ate onde foi..." class="p-3 bg-slate-50 border rounded-xl text-sm">
+                    <div class="space-y-4">
+                         <div class="relative"><label class="absolute -top-2.5 left-4 px-2 bg-slate-800 text-[10px] font-bold text-slate-300">Atividades Extra</label><input type="text" id="dr-atividades" oninput="gatilhoAutoSave()" class="w-full p-4 glass-input rounded-xl text-sm"></div>
+                         <div class="grid grid-cols-2 gap-4">
+                             <div class="relative"><label class="absolute -top-2.5 left-4 px-2 bg-slate-800 text-[10px] font-bold text-slate-300">Até Onde Foi</label><input type="text" id="dr-ateOnde" oninput="gatilhoAutoSave()" class="w-full p-4 glass-input rounded-xl text-sm"></div>
+                             <div class="relative"><label class="absolute -top-2.5 left-4 px-2 bg-slate-800 text-[10px] font-bold text-slate-300">Próxima Aula</label><input type="text" id="dr-proxima" oninput="gatilhoAutoSave()" class="w-full p-4 glass-input rounded-xl text-sm"></div>
+                         </div>
                     </div>
                 </div>
-
-                <div class="pt-8 flex justify-between items-center">
-                    <div id="boxAttendanceStrings" class="hidden flex gap-4 text-[10px] font-bold text-slate-400">
-                        <span id="strPres">PRES: -</span>
-                        <span id="strAbs">FALT: -</span>
+                
+                <div class="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-700/50 pt-6">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-400">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Auto-Save (Attendance é garantido com "X")
                     </div>
                     <div class="flex gap-4">
-                        <a id="btnLinkDocs" href="#" target="_blank" class="hidden text-blue-600 font-bold text-xs">Ver Docs</a>
-                        <button onclick="forcarSalvamento()" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl">Salvar</button>
+                        <a id="btnLinkDocs" href="#" target="_blank" class="hidden px-6 py-3 bg-slate-700 text-white rounded-xl font-bold flex gap-2 items-center"><i data-lucide="file-text" class="w-4 h-4"></i> Ler Arquivo Gerado</a>
+                        <button onclick="forcarSalvamento()" class="px-10 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                            FORÇAR SYNC NOW
+                        </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- TAB: REPORTS -->
-            <div id="tab-reports" class="hidden p-6 space-y-6">
-                <div class="grid grid-cols-4 gap-4">
-                    <input type="text" id="rcMonth" placeholder="Mês" class="p-2 border rounded text-sm">
-                    <input type="text" id="rcLevel" placeholder="Nível" class="p-2 border rounded text-sm">
-                    <input type="text" id="rcFreq" placeholder="Freq" class="p-2 border rounded text-sm">
-                    <input type="text" id="rcType" placeholder="Tipo" class="p-2 border rounded text-sm">
+            </section>
+            
+            <!-- SECTOR 3: REPORT CARDS -->
+            <section class="glass border-t-4 border-t-purple-500 rounded-3xl p-8 relative">
+                <h3 class="font-heading text-lg font-bold uppercase tracking-wider mb-6 flex items-center gap-3 text-purple-400 relative z-10">
+                    <span class="bg-purple-500/20 p-2 rounded-lg"><i data-lucide="award" class="w-5 h-5"></i></span>
+                    Setor 3: Gerador Trimestral (Boletim PDF Automático)
+                </h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="relative"><label class="absolute -top-2.5 left-4 px-1 bg-slate-800 text-[10px] text-purple-300 font-bold">Month</label><input type="text" id="rcMonth" class="w-full p-3 glass-input rounded-xl text-sm"></div>
+                    <div class="relative"><label class="absolute -top-2.5 left-4 px-1 bg-slate-800 text-[10px] text-purple-300 font-bold">Level</label><input type="text" id="rcLevel" class="w-full p-3 glass-input rounded-xl text-sm"></div>
+                    <div class="relative"><label class="absolute -top-2.5 left-4 px-1 bg-slate-800 text-[10px] text-purple-300 font-bold">Freq</label><input type="text" id="rcFreq" class="w-full p-3 glass-input rounded-xl text-sm"></div>
+                    <div class="relative"><label class="absolute -top-2.5 left-4 px-1 bg-slate-800 text-[10px] text-purple-300 font-bold">Type</label><input type="text" id="rcType" class="w-full p-3 glass-input rounded-xl text-sm"></div>
                 </div>
-                <div id="listaAlunosRC" class="space-y-6"></div>
-                <div class="flex justify-end gap-4">
-                    <a id="btnDocCards" href="#" target="_blank" class="hidden text-green-600 font-bold text-xs">Cards</a>
-                    <button onclick="gerarReportCards()" class="px-8 py-3 bg-green-600 text-white font-bold rounded-2xl">Gerar</button>
+                
+                <div id="listaAlunosRC" class="space-y-4"></div>
+                
+                <div class="mt-8 flex justify-end gap-4 border-t border-slate-700/50 pt-6">
+                    <a id="btnDocCards" href="#" target="_blank" class="hidden px-6 py-3 bg-slate-700 text-white rounded-xl font-bold flex items-center gap-2"><i data-lucide="file-pdf" class="w-4 h-4"></i> PDF Finalizado</a>
+                    <button onclick="gerarReportCards()" class="px-10 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                        Gerar Report Cards na Pasta do Professor
+                    </button>
                 </div>
-            </div>
+            </section>
+            
         </div>
     </main>
 
     <script>
-        const state = { alunos: [], presencas: [], navDate: new Date(), selectedDateStr: "", isReady: false, isSaving: false, docUrl: "" };
+        const state = { 
+            perfis: [], activeProfId: null,
+            alunos: [], presencas: [], 
+            navDate: new Date(), selectedDateStr: "", 
+            isReady: false, isSaving: false 
+        };
         let autoSaveTimeout = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            const saved = localStorage.getItem('omniV5_apiUrl');
-            if (saved) document.getElementById('apiUrl').value = saved;
+            
+            // Carga do Sistema
+            const savedUrl = localStorage.getItem('omniV6_apiUrl');
+            if (savedUrl) document.getElementById('apiUrl').value = savedUrl;
+            
+            const savedProfs = localStorage.getItem('omniV6_profs');
+            if(savedProfs) state.perfis = JSON.parse(savedProfs);
+            renderizarSelectProfs();
+            
             const hoje = new Date();
             state.selectedDateStr = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}`;
             document.getElementById('inputData').value = state.selectedDateStr;
             renderizarCalendario();
-            document.getElementById('tab-daily').addEventListener('input', () => { if (state.isReady) gatilhoAutoSave(); });
         });
 
-        async function callAPI(payload) {
-            const url = document.getElementById('apiUrl').value.trim();
-            try {
-                const response = await fetch(url, { method: 'POST', redirect: 'follow', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                const data = await response.json();
-                if (data.status === "Erro") throw new Error(data.mensagem);
-                return data;
-            } catch (err) {
-                showToast("Erro", err.message, "error");
-                throw err;
+        // -------------------------------------------------------------
+        // CONFIG GLOBAL / CONTAS
+        // -------------------------------------------------------------
+        function salvarAppConfig() { localStorage.setItem('omniV6_apiUrl', document.getElementById('apiUrl').value.trim()); }
+        
+        function renderizarSelectProfs() {
+            const sel = document.getElementById('selectProfile');
+            sel.innerHTML = '<option value="-1">+ Adicionar / Limpar Campos</option>';
+            state.perfis.forEach((p, idx) => {
+                sel.innerHTML += `<option value="${idx}">👤 ${p.nome}</option>`;
+            });
+            if (state.perfis.length > 0 && state.activeProfId === null) {
+                sel.value = 0; carregarPerfil();
             }
         }
+        
+        function carregarPerfil() {
+            const idx = parseInt(document.getElementById('selectProfile').value);
+            if (idx === -1 || isNaN(idx)) {
+                state.activeProfId = null;
+                document.getElementById('profName').value = '';
+                document.getElementById('profSheet').value = '';
+                document.getElementById('profFolder').value = '';
+            } else {
+                state.activeProfId = idx;
+                const p = state.perfis[idx];
+                document.getElementById('profName').value = p.nome;
+                document.getElementById('profSheet').value = p.sheetId;
+                document.getElementById('profFolder').value = p.folderId;
+            }
+        }
+        
+        function salvarPerfil() {
+            const n = document.getElementById('profName').value.trim();
+            const s = document.getElementById('profSheet').value.trim();
+            const f = document.getElementById('profFolder').value.trim();
+            if(!n || !s || !f) return showToast("Aviso", "Preencha Nome, ID da Planilha, e ID Pasta", "error");
+            
+            if(state.activeProfId !== null) {
+                state.perfis[state.activeProfId] = {nome: n, sheetId: s, folderId: f};
+            } else {
+                state.perfis.push({nome: n, sheetId: s, folderId: f});
+                state.activeProfId = state.perfis.length - 1;
+            }
+            
+            localStorage.setItem('omniV6_profs', JSON.stringify(state.perfis));
+            renderizarSelectProfs();
+            document.getElementById('selectProfile').value = state.activeProfId;
+            showToast("Perfil Salvo", `Perfil ${n} salvo localmente.`, "success");
+        }
+        
+        function excluirPerfil() {
+            if(state.activeProfId === null) return;
+            state.perfis.splice(state.activeProfId, 1);
+            localStorage.setItem('omniV6_profs', JSON.stringify(state.perfis));
+            state.activeProfId = null;
+            renderizarSelectProfs();
+            carregarPerfil();
+        }
 
+        // -------------------------------------------------------------
+        // REDE / API
+        // -------------------------------------------------------------
+        async function callAPI(payload) {
+            const url = document.getElementById('apiUrl').value.trim();
+            if(!url) throw new Error("A API URL Central não foi informada.");
+            
+            // Injete o Perfil Ativo para qualquer requisição
+            const prof = state.activeProfId !== null ? state.perfis[state.activeProfId] : null;
+            if(prof) {
+                payload.sheetId = prof.sheetId;
+                payload.folderId = prof.folderId;
+            } else {
+                throw new Error("Nenhum Perfil Selecionado!");
+            }
+
+            const response = await fetch(url, { 
+                method: 'POST', redirect: 'follow', 
+                body: JSON.stringify(payload), 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
+            });
+            const textOutput = await response.text();
+            
+            let data;
+            try { data = JSON.parse(textOutput); } 
+            catch(err) { throw new Error("Google Error: Cheque seu acesso às planilhas alheias e permissões (Executar como Quem)."); }
+
+            if (data.status === "Erro") throw new Error(data.mensagem);
+            return data;
+        }
+
+        // -------------------------------------------------------------
+        // STARTUP TURMAS
+        // -------------------------------------------------------------
+        async function conectarPlanilhaTeacher() {
+            if(state.activeProfId === null) return showToast("Aviso", "Selecione um professor primeiro.", "error");
+            toggleLoader(true, "Conectando ao banco de dados do professor...");
+            try {
+                const res = await callAPI({ acao: "buscar_abas" });
+                const sel = document.getElementById('selectTurma');
+                sel.innerHTML = '<option value="">▼ Selecione a Turma desse professor</option>';
+                res.abas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
+                document.getElementById('dashboardArea').classList.remove('hidden');
+                showToast("Conexão Master", "Classes vinculadas via Google App Script Dinâmico.", "success");
+            } catch(e) {
+                showToast("Erro de Acesso", e.message, "error");
+            } finally { toggleLoader(false); }
+        }
+
+        async function selecionarTurma() {
+            const t = document.getElementById('selectTurma').value;
+            if (!t) return;
+            toggleLoader(true, "Mapeando nomes e Coluna E...");
+            try {
+                const res = await callAPI({ acao: "buscar_alunos", turma: t });
+                state.alunos = res.alunos || [];
+                state.presencas = state.alunos.map(() => 'P');
+                gerarInterfaceAlunos();
+                buscarDadosData();
+            } catch(e) { showToast("Falha Turma", e.message, "error"); } 
+            finally { toggleLoader(false); }
+        }
+
+        // -------------------------------------------------------------
+        // UI HELPERS & AUTO SAVE
+        // -------------------------------------------------------------
         function gatilhoAutoSave() {
+            if(!state.isReady) return;
             setStatusSincronizando();
             clearTimeout(autoSaveTimeout);
             autoSaveTimeout = setTimeout(() => { salvarDadosDiario(true); }, 2500);
         }
 
         function setStatusSincronizando() {
-            const txt = document.getElementById('syncText');
-            txt.innerText = "Sincronizando...";
-            document.getElementById('syncDot').className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
+            document.getElementById('syncText').innerText = "Syncing...";
+            document.getElementById('syncDot').className = "w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_cyan]";
+        }
+        function setStatusSincronizado(s = true) {
+            document.getElementById('syncText').innerText = s ? "Synced" : "Fail";
+            document.getElementById('syncDot').className = "w-2 h-2 rounded-full " + (s ? "bg-green-400 shadow-[0_0_8px_#4ade80]" : "bg-red-500");
         }
 
-        function setStatusSincronizado(sucesso = true) {
-            const txt = document.getElementById('syncText');
-            txt.innerText = sucesso ? "Sincronizado" : "Erro";
-            document.getElementById('syncDot').className = "w-2 h-2 rounded-full " + (sucesso ? "bg-green-500" : "bg-red-500");
+        function toggleLoader(s, text="Processando") {
+            const l = document.getElementById('loader');
+            document.getElementById('loaderSubtext').innerText = text;
+            if(s) { l.classList.remove('hidden'); void l.offsetWidth; l.classList.add('opacity-100'); }
+            else { l.classList.remove('opacity-100'); setTimeout(()=>l.classList.add('hidden'), 300); }
         }
-
-        function showToast(title, msg, type = 'success') {
+        
+        function showToast(t, m, type='success'){
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            toast.className = `toast-enter p-4 min-w-[320px] bg-white border-l-4 rounded-xl shadow-xl flex items-start gap-3 pointer-events-auto transition-all ${type === 'success' ? 'border-green-500' : 'border-red-500'}`;
-            toast.innerHTML = `<div><h4 class="font-black text-xs uppercase">${title}</h4><p class="text-xs mt-1">${msg}</p></div>`;
+            const clr = type==='success'?'border-green-500':'border-red-500';
+            toast.className = `toast-enter p-4 glass w-[320px] shadow-2xl rounded-2xl flex flex-col border-l-4 ${clr} transition-all z-50`;
+            toast.innerHTML = `<h4 class="font-bold text-sm tracking-wide">${t}</h4><p class="text-xs mt-1 text-slate-300 font-medium">${m}</p>`;
             container.appendChild(toast);
             requestAnimationFrame(() => toast.classList.add('toast-active'));
-            setTimeout(() => { toast.classList.remove('toast-active'); setTimeout(() => toast.remove(), 300); }, 4000);
-        }
-
-        function toggleLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
-
-        function abaAtiva(id) {
-            document.getElementById('tab-daily').classList.add('hidden');
-            document.getElementById('tab-reports').classList.add('hidden');
-            document.getElementById(id).classList.remove('hidden');
-            document.getElementById('btn-tab-daily').classList.toggle('tab-active', id==='tab-daily');
-            document.getElementById('btn-tab-reports').classList.toggle('tab-active', id==='tab-reports');
+            setTimeout(() => { toast.classList.remove('toast-active'); setTimeout(() => toast.remove(), 400); }, 3500);
         }
 
         function renderizarCalendario() {
             const y = state.navDate.getFullYear(), m = state.navDate.getMonth();
             const first = new Date(y, m, 1).getDay(), total = new Date(y, m + 1, 0).getDate();
-            document.getElementById('labelMes').innerText = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(state.navDate);
+            document.getElementById('labelMes').innerText = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(state.navDate);
             const grid = document.getElementById('gridCalendario');
             grid.innerHTML = '';
             for (let i = 0; i < first; i++) grid.innerHTML += `<div></div>`;
@@ -267,132 +421,147 @@
                 grid.innerHTML += `<div onclick="selecionarData('${ds}')" class="cal-day ${ds === state.selectedDateStr ? 'cal-selected' : ''}">${d}</div>`;
             }
         }
-
         function navegarMes(v) { state.navDate.setMonth(state.navDate.getMonth() + v); renderizarCalendario(); }
         function selecionarData(str) { state.selectedDateStr = str; document.getElementById('inputData').value = str; renderizarCalendario(); buscarDadosData(); }
 
-        function salvarURLLocal() { localStorage.setItem('omniV5_apiUrl', document.getElementById('apiUrl').value.trim()); }
-
-        async function conectarSistema() {
-            toggleLoader(true);
-            try {
-                const res = await callAPI({ acao: "buscar_abas" });
-                const sel = document.getElementById('selectTurma');
-                sel.innerHTML = '<option value="">Turma...</option>';
-                res.abas.forEach(a => sel.innerHTML += `<option value="${a}">${a}</option>`);
-                document.getElementById('contextArea').classList.remove('hidden');
-            } finally { toggleLoader(false); }
-        }
-
-        async function selecionarTurma() {
-            const t = document.getElementById('selectTurma').value;
-            if (!t) return;
-            toggleLoader(true);
-            try {
-                const res = await callAPI({ acao: "buscar_alunos", turma: t });
-                state.alunos = res.alunos || [];
-                state.presencas = state.alunos.map(() => 'P');
-                gerarInterfaceAlunos();
-                document.getElementById('workspaceArea').classList.remove('hidden');
-                buscarDadosData();
-            } finally { toggleLoader(false); }
+        // -------------------------------------------------------------
+        // SECTORS GENERATORS
+        // -------------------------------------------------------------
+        function abrirLessonPlan() {
+            let u = document.getElementById('dr-lessoncode').value.trim();
+            if(u) {
+                if(!u.startsWith('http')) u = "https://" + u;
+                window.open(u, '_blank');
+            } else alert("Nenhum link configurado.");
         }
 
         function gerarInterfaceAlunos() {
-            const d = document.getElementById('listaAlunosDiario'), r = document.getElementById('listaAlunosRC');
+            const d = document.getElementById('listaAlunosDiario');
+            const r = document.getElementById('listaAlunosRC');
             d.innerHTML = ''; r.innerHTML = '';
+            
+            if(state.alunos.length === 0) {
+                 d.innerHTML = `<div class="p-4 text-center border border-red-500/20 bg-red-900/10 rounded-xl text-red-200 text-sm">Turma vazia ou estrutura errada no cabeçalho (não tem "Students: X / Y").</div>`;
+                 return;
+            }
+
             state.alunos.forEach((n, i) => {
-                d.innerHTML += `<div class="p-3 bg-white border rounded-2xl flex items-center gap-4">
-                    <span class="text-xs font-bold w-1/3">${n}</span>
-                    <button onclick="setPresenca(${i},'P')" id="btn-p-${i}" class="px-4 py-1.5 rounded bg-green-500 text-white text-[10px]">P</button>
-                    <button onclick="setPresenca(${i},'F')" id="btn-f-${i}" class="px-4 py-1.5 rounded text-slate-400 text-[10px]">F</button>
-                    <input id="dr-dif-${i}" class="flex-grow p-2 border rounded-xl text-xs" placeholder="Dif.">
-                    <input id="dr-elo-${i}" class="flex-grow p-2 border rounded-xl text-xs" placeholder="Elo.">
+                // Diário
+                d.innerHTML += `
+                <div class="p-3 bg-slate-800/40 border border-slate-700/50 rounded-xl flex flex-col md:flex-row items-center gap-3 w-full">
+                    <span class="w-full md:w-32 text-xs font-bold truncate" title="${n}">${n.split(' ')[0]}</span>
+                    
+                    <div class="flex gap-1">
+                        <button onclick="setPresenca(${i},'P')" id="btn-p-${i}" class="px-5 py-2 bg-green-500/20 text-green-400 font-bold border border-green-500/30 rounded-lg text-xs uppercase transition-all shadow-sm">PRESENTE</button>
+                        <button onclick="setPresenca(${i},'F')" id="btn-f-${i}" class="px-5 py-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 font-bold border border-transparent rounded-lg text-xs uppercase transition-all">FALTOU</button>
+                    </div>
+
+                    <div class="flex-grow flex gap-2 w-full">
+                        <input id="dr-dif-${i}" oninput="gatilhoAutoSave()" class="w-full p-2 glass-input border-slate-700 rounded-lg text-xs" placeholder="Qual dificuldade ou anotação para o RC?">
+                        <input id="dr-elo-${i}" oninput="gatilhoAutoSave()" class="w-full p-2 glass-input border-slate-700 rounded-lg text-xs" placeholder="Algum elogio?">
+                    </div>
                 </div>`;
-                r.innerHTML += `<div class="p-4 bg-slate-50 border rounded-2xl"><h4 class="font-black text-xs">${n}</h4><div class="grid grid-cols-4 gap-2 mt-2">${['spk','lis','rea','wri','gra','voc','par','pre'].map(k=>`<input id="rc-${k}-${i}" placeholder="${k}" class="p-1 border text-xs">`).join('')}</div><textarea id="rc-com-${i}" class="w-full mt-2 text-xs h-10 p-2"></textarea></div>`;
+                
+                // RC 
+                const pref = ['spk','lis','rea','wri','gra','voc','par','pre'];
+                const flds = ['Speaking','Listening','Reading','Writing','Grammar','Vocabulary','Particip','Prep.'];
+                let inp = '';
+                pref.forEach((p, idx) => inp += `<div class="text-center"><label class="block text-[8px] text-purple-300 font-bold mb-1">${flds[idx]}</label><input id="rc-${p}-${i}" placeholder="-" class="w-full text-center p-1.5 rounded bg-slate-900 border border-purple-500/30 text-xs"></div>`);
+                
+                r.innerHTML += `<div class="p-4 glass border border-purple-500/20 rounded-2xl"><h4 class="font-bold text-sm text-white border-b border-white/10 pb-2 mb-3"><i data-lucide="user" class="inline w-3 h-3 text-purple-400"></i> ${n}</h4><div class="grid grid-cols-4 md:grid-cols-8 gap-2">${inp}</div><textarea id="rc-com-${i}" class="w-full mt-3 rounded-lg bg-slate-900 border border-slate-700 text-xs p-2" placeholder="Teacher Comment..."></textarea></div>`;
             });
+            lucide.createIcons();
+            state.alunos.forEach((_, i) => setPresenca(i, 'P', false));
             state.isReady = true;
         }
 
-        function setPresenca(i, s) {
+        function setPresenca(i, s, doAuto=true) {
             state.presencas[i] = s;
-            document.getElementById(`btn-p-${i}`).className = s==='P' ? "px-4 py-1.5 rounded bg-green-500 text-white text-[10px]" : "px-4 py-1.5 rounded text-slate-400 text-[10px]";
-            document.getElementById(`btn-f-${i}`).className = s==='F' ? "px-4 py-1.5 rounded bg-red-500 text-white text-[10px]" : "px-4 py-1.5 rounded text-slate-400 text-[10px]";
-            atualizarStringsPresenca();
-            gatilhoAutoSave();
+            const bp = document.getElementById(`btn-p-${i}`), bf = document.getElementById(`btn-f-${i}`);
+            if(s === 'P') {
+                bp.className = "px-5 py-2 bg-green-500/20 text-green-400 font-bold border border-green-500/30 rounded-lg text-xs uppercase shadow-sm";
+                bf.className = "px-5 py-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 font-bold border border-transparent rounded-lg text-xs uppercase transition-all";
+            } else {
+                bp.className = "px-5 py-2 text-slate-500 hover:text-green-400 hover:bg-green-500/10 font-bold border border-transparent rounded-lg text-xs uppercase transition-all";
+                bf.className = "px-5 py-2 bg-red-500/20 text-red-400 font-bold border border-red-500/30 rounded-lg text-xs uppercase shadow-sm";
+            }
+            if(doAuto) gatilhoAutoSave();
         }
 
-        function atualizarStringsPresenca() {
-            const p = state.alunos.filter((n,i)=>state.presencas[i]==='P'), a = state.alunos.filter((n,i)=>state.presencas[i]==='F');
-            document.getElementById('strPres').innerText = "PRES: " + p.join(', ');
-            document.getElementById('strAbs').innerText = "FALT: " + a.join(', ');
-            document.getElementById('boxAttendanceStrings').classList.remove('hidden');
-        }
-
+        // -------------------------------------------------------------
+        // LOGIC
+        // -------------------------------------------------------------
         async function buscarDadosData() {
-            const t = document.getElementById('selectTurma').value, d = document.getElementById('inputData').value;
-            if (!t || !d) return;
+            if(!state.isReady) return;
             state.isReady = false;
-            toggleLoader(true);
+            ['dr-teacher','dr-conteudo','dr-atividades','dr-proxima','dr-ateOnde','dr-lessoncode'].forEach(id => document.getElementById(id).value = '');
+            state.alunos.forEach((_, i) => { document.getElementById(`dr-dif-${i}`).value=''; document.getElementById(`dr-elo-${i}`).value=''; setPresenca(i,'P',false); });
+
+            const t = document.getElementById('selectTurma').value, d = document.getElementById('inputData').value;
+            toggleLoader(true, `Lendo Planilha Dia: ${d}`);
             try {
-                const parts = d.split('-');
-                const res = await callAPI({ acao: "buscar_dados", turma: t, data: `${parts[2]}/${parts[1]}/${parts[0]}` });
-                if (res.status === "Sucesso" && res.dados) {
+                const pt = d.split('-');
+                const res = await callAPI({ acao: "buscar_dados", turma: t, data: `${pt[2]}/${pt[1]}/${pt[0]}` });
+                if(res.status==="Sucesso" && res.dados) {
                     const g = res.dados;
-                    document.getElementById('dr-teacher').value = g.teacher || "";
+                    const pr = state.perfis[state.activeProfId];
+                    document.getElementById('dr-teacher').value = g.teacher || pr.nome;
                     document.getElementById('dr-conteudo').value = g.lessonPlan || "";
                     document.getElementById('dr-atividades').value = g.extraActivity || "";
                     document.getElementById('dr-proxima').value = g.objectives || "";
-                    const absArr = (g.absence || "").toLowerCase().split(',').map(s=>s.trim());
-                    state.alunos.forEach((n,i)=>setPresenca(i, absArr.includes(n.toLowerCase()) ? 'F' : 'P'));
+                    document.getElementById('dr-lessoncode').value = g.lessonPlanCode || "";
+                    
+                    const absArr = (g.absence || "").toLowerCase().split(/[\/,]+/).map(s=>s.trim());
+                    state.alunos.forEach((n,i)=>setPresenca(i, absArr.includes(n.toLowerCase()) ? 'F' : 'P', false));
                 }
-            } finally { toggleLoader(false); state.isReady = true; }
+            } catch(e){} finally { toggleLoader(false); setTimeout(()=>state.isReady=true, 500); }
         }
 
-        async function salvarDadosDiario(isAuto = false) {
-            if (state.isSaving) return;
-            state.isSaving = true;
-            const t = document.getElementById('selectTurma').value, d = document.getElementById('inputData').value;
-            const parts = d.split('-');
+        async function salvarDadosDiario(isAuto=false) {
+            if(state.isSaving || !state.isReady) return;
+            state.isSaving=true;
+            const pt = document.getElementById('inputData').value.split('-');
             try {
                 const res = await callAPI({
-                    acao: "salvar_tudo", turma: t, data: `${parts[2]}/${parts[1]}/${parts[0]}`,
-                    attendance: state.alunos.filter((n,i)=>state.presencas[i]==='P').join(', '),
-                    absence: state.alunos.filter((n,i)=>state.presencas[i]==='F').join(', '),
+                    acao: "salvar_tudo", 
+                    turma: document.getElementById('selectTurma').value,
+                    nomesArray: state.alunos,
+                    data: `${pt[2]}/${pt[1]}/${pt[0]}`,
+                    absence: state.alunos.filter((n,i)=>state.presencas[i]==='F').join(' / '), // Regra Exata
                     teacher: document.getElementById('dr-teacher').value,
                     report: {
-                        conteudo: document.getElementById('dr-conteudo').value,
-                        atividades: document.getElementById('dr-atividades').value,
-                        proximaAula: document.getElementById('dr-proxima').value,
-                        dificuldadesGerais: document.getElementById('dr-dificuldades').value
+                        conteudo: document.getElementById('dr-conteudo').value, atividades: document.getElementById('dr-atividades').value,
+                        proximaAula: document.getElementById('dr-proxima').value, ateOnde: document.getElementById('dr-ateOnde').value,
+                        lessonPlanCode: document.getElementById('dr-lessoncode').value
                     },
-                    alunos: state.alunos.map((n,i)=>({ nome:n, dificuldade: document.getElementById(`dr-dif-${i}`).value, elogio: document.getElementById(`dr-elo-${i}`).value }))
+                    alunos: state.alunos.map((n,i)=>({nome:n, dificuldade: document.getElementById(`dr-dif-${i}`).value, elogio: document.getElementById(`dr-elo-${i}`).value}))
                 });
-                if (res.docUrl) { state.docUrl = res.docUrl; document.getElementById('btnLinkDocs').href = res.docUrl; document.getElementById('btnLinkDocs').classList.remove('hidden'); }
+                
+                if(res.docUrl){ 
+                   document.getElementById('btnLinkDocs').href = res.docUrl; 
+                   document.getElementById('btnLinkDocs').classList.remove('hidden'); 
+                }
                 setStatusSincronizado(true);
-            } catch(e) { setStatusSincronizado(false); }
-            finally { state.isSaving = false; autoSaveTimeout = null; }
+            } catch(e){ setStatusSincronizado(false); } finally { state.isSaving=false; }
         }
 
         function forcarSalvamento() { salvarDadosDiario(false); }
 
         async function gerarReportCards() {
-            toggleLoader(true);
+            toggleLoader(true, "Desenhando os PDFs na pasta do Professor...");
             try {
                 const res = await callAPI({
                     acao: "gerar_report_cards", turma: document.getElementById('selectTurma').value, mes: document.getElementById('rcMonth').value,
-                    teacher: document.getElementById('dr-teacher').value, level: document.getElementById('rcLevel').value,
-                    classType: document.getElementById('rcType').value, frequency: document.getElementById('rcFreq').value,
+                    teacher: document.getElementById('dr-teacher').value || state.perfis[state.activeProfId].nome, 
+                    level: document.getElementById('rcLevel').value, classType: document.getElementById('rcType').value, frequency: document.getElementById('rcFreq').value,
                     alunos: state.alunos.map((n,i)=>({
-                        nome:n, speaking: document.getElementById(`rc-spk-${i}`).value, listening: document.getElementById(`rc-lis-${i}`).value,
-                        reading: document.getElementById(`rc-rea-${i}`).value, writing: document.getElementById(`rc-wri-${i}`).value,
-                        grammar: document.getElementById(`rc-gra-${i}`).value, vocabulary: document.getElementById(`rc-voc-${i}`).value,
-                        participation: document.getElementById(`rc-par-${i}`).value, preparation: document.getElementById(`rc-pre-${i}`).value,
-                        comment: document.getElementById(`rc-com-${i}`).value
+                        nome:n, speaking:document.getElementById(`rc-spk-${i}`).value, listening:document.getElementById(`rc-lis-${i}`).value, reading:document.getElementById(`rc-rea-${i}`).value,
+                        writing:document.getElementById(`rc-wri-${i}`).value, grammar:document.getElementById(`rc-gra-${i}`).value, vocabulary:document.getElementById(`rc-voc-${i}`).value,
+                        participation:document.getElementById(`rc-par-${i}`).value, preparation:document.getElementById(`rc-pre-${i}`).value, comment:document.getElementById(`rc-com-${i}`).value
                     }))
                 });
-                if (res.url) { document.getElementById('btnDocCards').href = res.url; document.getElementById('btnDocCards').classList.remove('hidden'); }
-            } finally { toggleLoader(false); }
+                if(res.url){ document.getElementById('btnDocCards').href=res.url; document.getElementById('btnDocCards').classList.remove('hidden'); }
+            } catch(e){ showToast("Erro Documento", e.message, "error"); } finally { toggleLoader(false); }
         }
     </script>
 </body>
